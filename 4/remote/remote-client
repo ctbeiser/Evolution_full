@@ -1,0 +1,4 @@
+#! /usr/bin/env python3.5
+from remote_player import RemotePlayer
+remote_player = RemotePlayer("localhost", 45678)
+remote_player.process_messages()

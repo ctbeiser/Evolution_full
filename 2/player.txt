@@ -1,0 +1,31 @@
+TO: Matthias Felleisen
+
+FROM: Lukas Berger, Christopher Beiser
+
+DATE: January 20, 2016
+
+SUBJECT: Impossible to Implement Player Interface given Proposed Strategy
+
+We have determined that Player interface provided to us is impossible to
+implement given the proposed decision strategy.
+
+The decision strategy includes the following: “[T]he player’s strategy is to
+place the card with the highest face value when it is its turn, regardless of
+the stacks on the table. When it must pick up a stack from the table, it
+naturally picks up the stack with the fewest number of bull points.”
+
+The interface specification requires the player to choose a stack to pick
+up at the time that they choose a card to play. One of the test cases clearly
+shows that an ID for a stack to pick up should be returned if the given
+card's face value is smaller than all of the cards on top of the four stacks
+at the time the card is chosen.
+
+The game rules specify that all players must pick a card before any of the
+cards are placed on the stacks, and therefore the player cannot reliably know
+what the stacks will look like when its card is placed. This means that the
+player will not always be able to choose the stack with the lowest number
+of bull points.
+
+As a result of the issue described above, we have determined that it is
+impossible to implement a player that would follow the desired strategy
+and at the same time conform to the provided interface.

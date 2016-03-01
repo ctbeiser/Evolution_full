@@ -1,0 +1,125 @@
+From 18d1ee4d0d0be5ef32303df8b8efe08e94a3bac5 Mon Sep 17 00:00:00 2001
+From: lukasberger <berger.lukas@gmail.com>
+Date: Sun, 31 Jan 2016 15:54:57 -0500
+Subject: [PATCH 3/6] make number of cards configurable and add default
+
+---
+ 2/take5/dealer.py           |  8 ++++++--
+ 2/take5/definitions.py      | 12 +++++++++---
+ 2/take5/main.py             |  3 ++-
+ 2/take5/test_definitions.py |  4 ++++
+ 4 files changed, 21 insertions(+), 6 deletions(-)
+
+diff --git a/2/take5/dealer.py b/2/take5/dealer.py
+index 6a712f2..3dffae3 100644
+--- a/2/take5/dealer.py
++++ b/2/take5/dealer.py
+@@ -31,19 +31,23 @@ class Dealer:
+         self.turns = None
+         self.max_bull_points = None
+         self.max_stack_size = MAX_STACK_SIZE
++        self.deck_size = None
+ 
+-    def game(self, turns=TURNS_PER_ROUND, max_bull_points=MAX_BULL_POINTS, max_stack_size=MAX_STACK_SIZE):
++    def game(self, turns=TURNS_PER_ROUND, max_bull_points=MAX_BULL_POINTS, max_stack_size=MAX_STACK_SIZE,
++             deck_size=None):
+         """ Simulates a complete game and returns the player id of the winner.
+         :param turns: number of turns to be played / cards to be given out
+         :param max_bull_points: maximum number of bull points each player can
+                                 have before a game ends
+         :param max_stack_size: maximum size of a stack before a player must pick it up
++        :param deck_size: size of the card deck
+         :return: the player id of the winner
+         """
+         self.player_states = [PlayerState(player) for player in self.players]
+         self.turns = turns
+         self.max_bull_points = max_bull_points
+         self.max_stack_size = max_stack_size
++        self.deck_size = deck_size
+ 
+         result = self.round(turns)
+ 
+@@ -84,7 +88,7 @@ class Dealer:
+         :param turns: number of turns to play / cards to give to each player
+         :return: the ID of the winning player, if there is one or None
+         """
+-        self.deck = create_deck()
++        self.deck = create_deck(deck_size=self.deck_size)
+         random.shuffle(self.deck)
+ 
+         self.set_up_round(turns, self.player_states)
+diff --git a/2/take5/definitions.py b/2/take5/definitions.py
+index d625fe8..790bf56 100644
+--- a/2/take5/definitions.py
++++ b/2/take5/definitions.py
+@@ -2,7 +2,8 @@
+ 
+ A Card is a namedtuple of (value, bullvalue), where value is a Value, and
+     bullvalue is a BullValue
+-A Value is an Integer in the range [1, 104]
++A Value is an Integer in the range [1, N], where N defaults to 104,
++    but can be any positive integer
+ A BullValue is an Integer in the range [2, 7]
+ A Stacks is a 4-tuple of list of Card, with the bottom of the stack first
+ a Deck is a list of Card, with the topmost card at the end
+@@ -14,6 +15,8 @@ from collections import namedtuple
+ 
+ Card = namedtuple("Card", "value bullvalue")
+ 
++DEFAULT_DECK_SIZE = 104
++
+ 
+ def default_number_bullpoint_mapping(card_value):
+     """ Returns a BullValue based on 6Nimmt! rules for the given card value.
+@@ -37,10 +40,13 @@ def default_number_bullpoint_mapping(card_value):
+         return 1
+ 
+ 
+-def create_deck(number_bullpoint_mapping=default_number_bullpoint_mapping):
++def create_deck(number_bullpoint_mapping=default_number_bullpoint_mapping, deck_size=None):
+     """ Creates a new Deck of cards according to the 6Nimmt rules
+     :param number_bullpoint_mapping: a function that returns the desired number of bullpoints
+                                      for each given card value, the returned number must be a BullValue
++    :param deck_size: size of the deck
+     :return: a Deck of cards
+     """
+-    return [Card(n, number_bullpoint_mapping(n)) for n in range(1, 105)]
++    if deck_size is None:
++        deck_size = DEFAULT_DECK_SIZE
++    return [Card(n, number_bullpoint_mapping(n)) for n in range(1, deck_size + 1)]
+diff --git a/2/take5/main.py b/2/take5/main.py
+index 97382e6..3a0a3bc 100644
+--- a/2/take5/main.py
++++ b/2/take5/main.py
+@@ -19,6 +19,7 @@ from dealer import Dealer
+ from player import Player
+ 
+ MAX_STACK_SIZE = 6
++DECK_SIZE = 210
+ 
+ 
+ def simulate_game(num_players):
+@@ -28,7 +29,7 @@ def simulate_game(num_players):
+     """
+     players = [Player(i, num_players) for i in range(num_players)]
+     dealer = Dealer(players)
+-    dealer.game(max_stack_size=MAX_STACK_SIZE)
++    dealer.game(max_stack_size=MAX_STACK_SIZE, deck_size=DECK_SIZE)
+     return dealer.stats()
+ 
+ 
+diff --git a/2/take5/test_definitions.py b/2/take5/test_definitions.py
+index 4b39984..06023e5 100644
+--- a/2/take5/test_definitions.py
++++ b/2/take5/test_definitions.py
+@@ -29,3 +29,7 @@ class DefinitionsTests(unittest.TestCase):
+         deck = create_deck()
+         self.assertEqual(len(deck), 104)
+         self.assertEqual(len(set([card.value for card in deck])), 104)
++
++        deck = create_deck(deck_size=210)
++        self.assertEqual(len(deck), 210)
++        self.assertEqual(len(set([card.value for card in deck])), 210)
+-- 
+2.1.3
+

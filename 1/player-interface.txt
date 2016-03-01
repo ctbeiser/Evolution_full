@@ -1,0 +1,73 @@
+     __   _  _ ___ __  __ __  __ _____   ___ ___ ___ ___ 
+    / /  | \| |_ _|  \/  |  \/  |_   _| / __| _ \ __/ __|
+   / _ \ | .` || || |\/| | |\/| | | |   \__ \  _/ _| (__ 
+   \___/ |_|\_|___|_|  |_|_|  |_| |_|   |___/_| |___\___|
+
+Table of Contents                      
+0. STRUCTURE OF THIS DOCUMENT
+1. OVERVIEW
+2. TURN WALKTHROUGH 
+3. METHOD SPECIFICATION
+
+0. STRUCTURE OF THIS DOCUMENT
+This document is split into a brief overview of the high level approach, an 
+example turn, which explains when the different methods on your provided object
+are called, and the detailed specification of what methods you need to provide
+ and the format in which data is passed.
+
+1. OVERVIEW
+When programming a player implementation for the 6 Nimmt! game, you will 
+provide a class that conforms to the interface described below. The class will
+be initialized by the main program, and periodically updated on gamestate and
+asked for input where needed.
+
+2. TURN WALKTHROUGH
+At the start of each round, a new turn is started.
+Whenever a new turn is started, on_new_turn(hand, stacks) is called on the player.
+The player returns the card they would like to discard.
+Once all players have picked a card, on_cards_chosen(discards) is called to 
+update the player on which cards have been discarded. 
+The cards will then be placed, in the order specified in the rules— if the card
+is smaller than the cards on the stacks, choose_stack_to_take(stacks) will be
+called, and is expected to return the index of the stack to take.
+
+Whenever the board is updated, on_stacks_updated(stacks) will be called on the 
+player. It is expected that if the player wishes to track points, they may do
+so themselves using these updates and the game rules.
+
+3. DATA + METHOD SPECIFICATION
+
+A Card is a namedtuple of (value, bullvalue), where value is a Value, and 
+bullvalue is a BullValue
+A Value is an Integer in the range [1, 104]
+A BullValue is an Integer in the range [1, 7]
+A Stacks is a 4-tuple of list of Card, with the bottom of the stack first
+
+def __init__(player_index, number_of_players):
+  """ Initializes a new player
+  @param player_index: this player's position around the table, indexed from 0
+  @param number_of_players: the number of players at the table.
+  """
+
+def on_new_turn(hand, stacks):
+  """ Called on the start of a turn. Used to choose the card to play that  turn
+  @param hand: a list of Card that represents the player's hand
+  @param stacks: a Stacks representing the state of the board
+  @returns a Card to be discarded 
+  """
+  
+def on_cards_chosen(discards):
+  """ Called when all players have passed in their cards for the turn
+  @param discards: a list of Card, where index corresponds to the player number
+  """
+  
+def choose_stack_to_take(stacks):
+  """ Called when a player is required to choose a stack to take, per the rules
+  @param stacks: a Stacks representing the stacks available to take
+  @return: the index of the chosen stack
+  """
+  
+def on_stacks_updated(stacks):
+  """ Called whenever the stacks on the board are updated
+  @param stacks: a Stacks representing the state of the board
+  """

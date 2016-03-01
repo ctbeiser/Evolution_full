@@ -1,0 +1,65 @@
+From 74ab040594d69285f262dd003cdbb984058f16fb Mon Sep 17 00:00:00 2001
+From: lukasberger <berger.lukas@gmail.com>
+Date: Sun, 31 Jan 2016 16:18:32 -0500
+Subject: [PATCH 6/6] change player to place lowest card first
+
+---
+ 3/take5/player.py       |  4 ++--
+ 3/take5/player_tests.py | 16 ++++++++--------
+ 2 files changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/3/take5/player.py b/3/take5/player.py
+index 1fc0f9c..dc521d3 100644
+--- a/3/take5/player.py
++++ b/3/take5/player.py
+@@ -1,7 +1,7 @@
+ """
+ Implements a Player according to the player interface specification from project 1.
+ The strategy for this player is the following:
+-    1. when asked to discard a card the player chooses the one with the largest value
++    1. when asked to discard a card the player chooses the one with the lowest value
+     2. when asked to pick a stack to take the player chooses the one with the lowest
+         amount of bull points
+ """
+@@ -22,7 +22,7 @@ class Player:
+         @param stacks: a Stacks representing the state of the board
+         @return: a Card to be discarded
+         """
+-        return max(hand, key=lambda card: card.value)
++        return min(hand, key=lambda card: card.value)
+ 
+     def on_cards_chosen(self, discards):
+         """ Called when all players have passed in their cards for the turn
+diff --git a/3/take5/player_tests.py b/3/take5/player_tests.py
+index e4192d1..fe61529 100644
+--- a/3/take5/player_tests.py
++++ b/3/take5/player_tests.py
+@@ -23,17 +23,17 @@ class TestPlayer(unittest.TestCase):
+ 
+         stacks = [self.generate_stack([(10, 1)])] * 4
+ 
+-        # highest is first
++        # lowest is last
+         hand1 = [card_hi, card_mi, card_lo]
+-        self.assertEqual(self.player.on_new_turn(hand1, stacks), card_hi)
++        self.assertEqual(self.player.on_new_turn(hand1, stacks), card_lo)
+ 
+-        # highest is in the middle
+-        hand1 = [card_mi, card_hi, card_lo]
+-        self.assertEqual(self.player.on_new_turn(hand1, stacks), card_hi)
+-
+-        # highest is last
++        # lowest is first
+         hand1 = [card_lo, card_mi, card_hi]
+-        self.assertEqual(self.player.on_new_turn(hand1, stacks), card_hi)
++        self.assertEqual(self.player.on_new_turn(hand1, stacks), card_lo)
++
++        # lowest in the middle
++        hand1 = [card_mi, card_lo, card_hi]
++        self.assertEqual(self.player.on_new_turn(hand1, stacks), card_lo)
+ 
+     def test_choose_stack_to_take(self):
+ 
+-- 
+2.1.3
+

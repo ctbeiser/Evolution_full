@@ -1,0 +1,181 @@
+  ______          _       _   _                _____
+ |  ____|        | |     | | (_)              / ____|
+ | |____   _____ | |_   _| |_ _  ___  _ __   | |  __  __ _ _ __ ___   ___
+ |  __\ \ / / _ \| | | | | __| |/ _ \| '_ \  | | |_ |/ _` | '_ ` _ \ / _ \
+ | |___\ V / (_) | | |_| | |_| | (_) | | | | | |__| | (_| | | | | | |  __/
+ |______\_/ \___/|_|\__,_|\__|_|\___/|_| |_|  \_____|\__,_|_| |_| |_|\___|
+
+
+Table of Contents:
+1. Main Components of the Game
+2. Other Data Types
+3. Overview of the Game
+4. Ambiguities
+
+
+
+1. Main Components of the Game
+
+Dealer:
+    Keeps track of the cards and facilitates the game rounds.
+    - deck: List of TraitCard (122)
+    - discard pile: List of TraitCard
+    - players : List of Player
+
+
+Player:
+    Keeps track of a player's species and food bag, offloads decisions
+    to the PlayerAgent
+    - species: List of SpeciesBoard
+    - food bag: Natural number
+    - agent: PlayerAgent
+
+PlayerAgent:
+    Makes decisions when asked by the Player
+
+
+2. Other Data Types
+
+WateringHole:
+    Keeps track of the number of food tokens in the game, as well
+    as discarded cards.
+    - food tokens: Natural number
+    - trait cards: List of TraitCard
+
+SpeciesBoard:
+    Represents a Species in the game, stores the food, population and
+    body sizes, as well as Trait cards.
+    - food: Number (0, 7) ? in/exclusive
+    - population size: Number (0, 7) ? in/exclusive
+    - body size: Number (0, 7) ? in/exclusive
+    - trait cards: List of TraitCard (max 3)
+
+    - left neighbor: SpeciesBoard or None
+    - right neighbor: SpeciesBoard or None
+
+TraitCard:
+    - trait: Trait
+    - food points: Number, (-8, 8) for carnivores else (-3, 3), ? in/exclusive
+
+Trait:
+	- trait id : a string unique to this trait.
+	- type : TraitType (Indicates whether the trait conforms to a certain
+	                    additional method.)
+
+TraitType is an enum with 5 cases— 4 are paired with an abstract method that
+ classes that implement it will implement. Below, 'owner' indicates the owner
+ of the trait; others are self explanatory.
+
+- PreventsAttack
+		 // Called to check if any species can attack another species.
+		 // False will prevent the attack from being possible
+	- method prevent_attack(attacker Species, attacked Species, owner species) -> Boolean
+
+- WasAttacked
+		// Called when any one species attacks another species.
+		// The species may be altered as desired.
+	- method was_attacked(attacker Species, attacked Species, owner Species) -> (Species, Species, Species)
+
+- FoodRevealed
+		// Called when the number of food available is revealed;
+		// the owner may be altered, as may the number of food available.
+	- method food_was_revealed(Number quantity, owner Species) -> (Number, Species)
+
+- FoodEaten
+		//Called when food is eaten by an herbivore; the number of food
+		// available may be changed, and food may be placed.
+	- method food_eaten(eater Species, quantity Number, owner Species) -> Number
+
+- NoReaction
+		// NoReaction traits, such as Carnivore, usually indicate that
+		// the behavior will be implemented inside the Player.
+
+
+3. Overview of the game
+
+Whenever the following overview refers to the Player making a decision, it
+means that the actual decision will be offloaded through a method call to a
+PlayerAgent, which can be a human or an AI.
+
+At the beginning of the game the Dealer randomly selects the starting Player
+ and the order at which the other Players will play. This order does not change
+ throughout the game. At the end of each turn the starting Player changes to the
+ next Player in order.
+
+At the beginning of a turn the Dealer gives a SpeciesBoard to every Player,
+ who doesn't have any SpeciesBoards. This SpeciesBoard has a population of zero,
+ which means that a TraitCard must be discarded by the Player in the same round
+ for the species to survive. [1] Then the Dealer gives each Player in order
+ 3 TraitCards from the deck, and an additional TraitCard for each SpeciesBoard
+ the Player has.
+
+Each Player is then asked by the Dealer to discard a single card to the
+ WateringHole. The Players can then directly assign up to 3 TraitCards to
+ any of their SpeciesBoards, this action removes the cards from their hand.
+ The Players can then discard any number of TraitCards from their hand to the
+ discard pile (hand to the Dealer) and choose one of the following effects:
+    * add 1 population to a single SpeciesBoard owned by the Player
+    * add 1 body to a single SpeciesBoard owned by the Player
+    * add 1 new SpeciesBoard either left or right of the existing boards
+ Each of these effects will be represented by calling a different method on
+ the dealer, with the card as the argument. The remaining cards stay in the
+ Players' hands until they are played or until the end of the game.
+
+After all Players have had their chance to use their TraitCards the feeding
+ phase begins. The Dealer updates the WateringBoard to include food tokens
+ from the discarded cards. The Dealer than asks each Player to return a
+ SpeciesBoard to feed. This must be a valid feeding target, which means
+ that it must either be a species with less food tokens than population.
+ If the given species is a vegetarian, it is given a food token from the
+ WateringHole by the Dealer. If the given species is a carnivore, then
+ the PlayerAgents is given a list of valid targets for eating, based on
+ the game rules. Target validity is determined by population/body sizes and
+ the result of calling prevent_attack with the species on each trait on the
+ board. The traits determine from the arguments whether they should activate
+ or not.
+
+The game ends and the winners are determined as specified in the requirements
+analysis.
+
+
+4. Ambiguities
+
+* The population size is listed as 0,7 -- is that inclusive?
+    (same for food point ranges and body sizes)
+* The species board comes "without population token" -- does that
+    just mean with a value of 0? (we assume yes.)
+* In the end game, do we end when the turn after cards run out is finished,
+    or do we end right after we hand out the last card before we'd have
+    too few to deal?
+* It is listed that 'vegetarian' cards must be fed from the watering hole --
+    are these just all the cards that aren't carnivores? (We assume yes.)
+* The Cooperation card uses the phrase "from the common food supply" --
+    does that just mean the watering hole? (We assume yes.)
+* "One player is randomly chosen as the first starting player; after that,
+    the players become starting players in a round-robin fashion."
+    Where does the order of the players come from? Is it also random, or is it
+    given to the game in order?
+* "During the game, each species board may be associated with up to three
+    trait cards." Does this mean simultaneously, or in total -- that is, does
+    the SB keep a history of TCs it's been associated with?
+    (We assume simultaneously.)
+* "At the beginning the dealer hands a species board to every player who
+    does not have one; the board comes without population token. Each player
+    also receives three trait cards plus one card per existing species."
+    Does the board handed at the beginning of the game count as an
+    'existing species'?
+* When an attack would be prevented by a target's traits, is the attacker
+    prevented from attacking, or are they allowed to attack but not able to
+    make it happen?
+* "A player arranges the species (boards) in a linear order." Is the player
+    allowed to rearrange cards at any time? (We assume only when a new board
+    is added)
+* Can the watering hole's count of tokens go negative?
+    (We assume no, and that it's capped at a minimum of zero.)
+* If there are no food tokens, does a carnivore not get to eat?
+    (We assume that they do not.)
+* "the players feed their species in a round-robin fashion" Does this mean
+    that each player feeds all of its species before the next player feeds
+    one, or that each player feeds one species before one of the next
+    player's species can feed? (We assume the latter.)
+

@@ -1,0 +1,162 @@
+Software Development
+Project 1
+
+##################################################
+#                                                #
+#    6 Nimmt! Player Component Specifications    #
+#                                                #
+##################################################
+
+////////////////////////
+INTRODUCTION
+
+The 6 Nimmt! simulation system consists of 3 components: the player component,
+the dealer component, and the main program. The main program takes care of
+instantiating the dealer and one or more players. The dealer component handles
+the rounds and turns, along with managing the deck, stacks of face-up cards, 
+and managing player scores.
+
+////////////////////////
+DATA TYPES
+
+These are the data types the player component uses:
+- Card: A Card is a tuple (x, y) where x is an integer between 1 and 104
+  (inclusive) and y is an integer between 2 and 7 (inclusive).
+- CardList: A CardList is a list of cards.
+- ID: An ID is an integer from 0 to 3
+- Stacks: A Stacks is a dictionary mapping IDs to CardLists. A Stacks must have
+  4 entries, each with an ID from 0 to 3. The last card in each CardList
+  represents the top card of that stack.
+- Decision: A Decision is a tuple (c, i) where c is the card the player has
+  chosen to play, and i is the ID of the stack to pick up if a stack must be
+  chosen, otherwise i is None.
+- PositiveInteger: A PositiveInteger is a whole number greater than or equal to zero.
+
+////////////////////////
+PYTHON INTERFACE
+
+The following is a python class that you can use as a subclass to create a
+player component. All the provided methods must be overriden for the component
+to work.
+
+------------------------
+class IPlayer():
+    ''' This class can be subclassed in order to create a working player
+    component. All methods must be overriden. '''
+
+    ''' add_cards: adds the given list of cards to the player's hand.
+        INPUT: CardList '''
+    def add_cards(self, cards):
+        pass
+
+    ''' pick_card: picks which card to play from the player's hand along with
+    which stack to pick up if necessary, given the current card stacks.
+        INPUT: Stacks
+        OUTPUT: Decision '''
+    def pick_card(self, stacks):
+        pass
+
+    ''' get_card_count: returns the number of cards in the player's hand.
+        OUTPUT: PositiveInteger '''
+    def get_card_count(self):
+        pass
+------------------------
+
+////////////////////////
+TESTS
+
+The following test class can be run to ensure that an implmented Player class
+will work correctly. You must have a class named Player that implements the
+IPlayer interface.
+
+------------------------
+import unittest
+
+class TestPlayerMethods(unittest.TestCase):
+  ## Cards
+  card1 = (1, 2)
+  card2 = (67, 3)
+  card3 = (45, 7)
+  card4 = (12, 2)
+  card5 = (103, 4)
+  card6 = (14, 3)
+  bad_card1 = (-1, 2)
+  bad_card2 = (1, 1)
+  bad_card3 = (105, 2)
+  bad_card4 = (1, 8)
+
+  ## CardLists
+  card_list1 = []
+  card_list2 = [card1]
+  card_list3 = [card2, card3]
+  card_list4 = [card4, card5]
+  card_list5 = [card6]
+  bad_card_list1 = [bad_card1]
+  bad_card_list2 = [bad_card1, bad_card2, bad_card3, bad_card4]
+  bad_card_list3 = [card1, bad_card1, card2, card3]
+
+  ## Stacks
+  stacks1 = {0: card_list1, 1: card_list2, 2: card_list3, 3: card_list4}
+  stacks2 = {0: card_list1, 1: card_list3, 2: card_list4, 3: card_list5}
+  stacks3 = {0: card_list1, 1: card_list2, 2: card_list4, 3: card_list5}
+
+  ## Decisions
+  decision1 = (card6, None)
+  decision2 = (card2, 2)
+
+  def test_add_and_get_cards(self):
+    # Empty CardList
+    player = Player()
+    player.add_cards(card_list1)
+    self.assertEqual(player.get_card_count(), 0)
+
+    # 1 Card in CardList
+    player = Player()
+    player.add_cards(card_list2)
+    self.assertEqual(player.get_card_count(), 1)
+
+    # 2 Cards in CardList
+    player = Player()
+    player.add_cards(card_list3)
+    self.assertEqual(player.get_card_count(), 2)
+
+    # 1 bad Card in CardList
+    player = Player()
+    player.add_cards(bad_card_list1)
+    self.assertEqual(player.get_card_count(), 0)
+
+    # 1 bad Card, 3 good Cards in CardList
+    player = Player()
+    player.add_cards(bad_card_list3)
+    self.assertEqual(player.get_card_count(), 3)
+
+  def test_pick_card(self):
+    # Player has no cards
+    player = Player()
+    self.assertEqual(player.pick_card(stacks1), None)
+
+    # Player has one card
+    player = Player()
+    player.add_cards(card_list5)
+    self.assertEqual(player.pick_card(stacks1), decision1)
+
+    # Player has one card and must choose a stack to pick up.
+    player = Player()
+    player.add_cards(card_list2)
+    chosen_card = player.pick_card(stacks2)
+    self.assertEqual(chosen_card[0], card1[0])
+    self.assertTrue(card[1] in range(4))
+
+    # Player has more than one card. The actual card that will be chosen here
+    # depends on the implementation of the player so we cannot test which card
+    # will be returned
+    player = Player()
+    player.add_cards(card_list3)
+    chosen_card = player.pick_card(stacks3)
+    self.assertTrue(chosen_card[0] in card_list3)
+    self.assertEqual(chosen_card[1], None)
+
+
+if __name__ == '__main__':
+    unittest.main()
+------------------------

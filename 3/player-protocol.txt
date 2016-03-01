@@ -1,0 +1,175 @@
+                   ___     __        _             _ __                     _
+   _/_      /     /       / ')      //            ' )  )      _/_          //
+   /  __.  /_  _ '--.    /  /____  // o ____  _    /--'__  __ /  __ _. __ // 
+  <__(_/|_/ <_</____)   (__// / <_</_<_/ / <_</_  /   / (_(_)<__(_)(__(_)</_ 
+
+Table of Contents                      
+1  INTERACTION DIAGRAM
+2. DATA DEFINITIONS
+3. MESSAGE SPECIFICATION
+
+
+1. INTERACTION DIAGRAM
+
+  ┌────────────┐                                               ┌────────────┐
+  │            │                                               │            │
+  │            │     ◀──────────── register ───────────────    │            │
+  │            │     ════════════ registered ═════════════▶    │            │
+  │            │                                               │            │
+  │            │                                               │            │
+  │            │     ────────── chooseCardToPlay ─────────▶    │            │
+  │            │     ◀═════════════ chosenCard ════════════    │            │
+  │            │                                               │            │
+  │            │                                               │            │
+  │   Dealer   │     ──────────── onCardsChosen ──────────▶    │   Player   │
+  │            │                                               │            │
+  │            │                                               │            │
+  │            │     ───────── onStacksUpdated ───────────▶    │            │
+  │            │                                               │            │
+  │            │                                               │            │
+  │            │                                               │            │
+  │            │     ──────── chooseStackToTake ──────────▶    │            │
+  │            │     ◀══════════ chosenStack ══════════════    │            │
+  │            │                                               │            │
+  └────────────┘                                               └────────────┘
+  
+2. DATA DEFINITIONS
+
+Card is a object: {"value": int, "bullvalue": int}
+
+Stack is an array of Card
+Stacks is an array of Stack
+
+3. MESSAGE SPECIFICATION
+
+Each message has the following format:
+
+{"action": ACTION, "data": object}
+
+
+Player Registration:
+
+A player can register for a game by sending a "register" message, with a chosen
+name. If the name is not unique, the player registration will fail.
+
+The dealer will respond within 10 seconds with a "registered" message with
+data containing the outcome of the registration and, if the registration is
+successful, the player number.
+
+If the registration is unsuccessful or a response is not received, the player
+may choose to send another message.
+
+    register
+    {
+        "action": "register",
+        "data": {
+            "playerName": string
+        }
+    }
+
+    registered
+    {
+        "action": "registered",
+        "data": {
+            "registered": boolean,
+            "playerNumber": int
+        }
+    }
+
+
+Choosing a card to play:
+
+Each turn the player will be asked to choose a card with a "chooseCardToPlay"
+message. This message's data will include an array of Cards in the player's
+hand, and the current state of the Stacks.
+
+The player will then respond with a message with the action "chosenCard",
+and in the message data include the chosen card's number. This number is
+the index of the card in the cards array.
+
+If a response is not received within 10 seconds, a Card may be chosen
+arbitrarily for the player.
+
+
+    chooseCardToPlay
+    {
+        "action": "chooseCardToPlay",
+        "data": {
+            "cards": Array.of(Card),
+            "stacks": Stacks
+        }
+    }
+
+    chosenCard
+    {
+        "action": "chosenCard",
+        "data": {
+            "cardNumber": int,
+        }
+    }
+
+
+Choosing a stack to take:
+
+Based on the rules, the player may be asked to choose a stack to pick
+up. This will be done with a "chooseStackToTake" message. This message
+data will include the current state of the Stacks.
+
+The player is expected to respond with a "chosenStack" message, with the
+message data containing a stack number. A stack number is the index of the
+desired stack in the Stacks array.
+
+If a response is not received within 10 seconds, a Stack may be chosen
+arbitrarily for the player.
+
+    chooseStackToTake
+    {
+        "action": "chooseStackToTake",
+        "data": {
+            "stacks": Stacks
+        }
+    }
+    chosenStack
+    {
+        "action": "chosenStack",
+        "data": {
+            "stackNumber": int,
+        }
+    }
+
+
+When all players choose a card:
+
+When a new turn begins and all players have chosen a card, each player
+will be notified about the cards played by all players though an
+"onCardsChosen" message. The data of this message will include an array
+of Cards whose length is the number of players in the game and the index
+of each card corresponds to the player number of its placer.
+
+A response is not expected for this message
+
+    onCardsChosen
+    {
+        "action": "onCardsChosen",
+        "data": {
+            "cards": Array.of(Card)
+        }
+    }
+
+
+When the board is updated:
+
+When any of the stacks are updated an "onStacksUpdated" message will be
+broadcast to all players. The data of this message include the new
+state of the Stacks.
+
+    onStacksUpdated
+    {
+        "action": "onStacksUpdated",
+        "data": {
+            "stacks": Stacks
+        }
+    }
+
+
+

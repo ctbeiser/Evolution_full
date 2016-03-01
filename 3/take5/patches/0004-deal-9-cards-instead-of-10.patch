@@ -1,0 +1,33 @@
+From 1815957bfd896c0e48feafc36257ef5c96649570 Mon Sep 17 00:00:00 2001
+From: lukasberger <berger.lukas@gmail.com>
+Date: Sun, 31 Jan 2016 16:02:09 -0500
+Subject: [PATCH 4/6] deal 9 cards instead of 10
+
+---
+ 2/take5/main.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/2/take5/main.py b/2/take5/main.py
+index 3a0a3bc..250e4b7 100644
+--- a/2/take5/main.py
++++ b/2/take5/main.py
+@@ -20,6 +20,7 @@ from player import Player
+ 
+ MAX_STACK_SIZE = 6
+ DECK_SIZE = 210
++TURNS_PER_ROUND = 9
+ 
+ 
+ def simulate_game(num_players):
+@@ -29,7 +30,7 @@ def simulate_game(num_players):
+     """
+     players = [Player(i, num_players) for i in range(num_players)]
+     dealer = Dealer(players)
+-    dealer.game(max_stack_size=MAX_STACK_SIZE, deck_size=DECK_SIZE)
++    dealer.game(max_stack_size=MAX_STACK_SIZE, deck_size=DECK_SIZE, turns=TURNS_PER_ROUND)
+     return dealer.stats()
+ 
+ 
+-- 
+2.1.3
+

@@ -1,0 +1,92 @@
+From b45ed7237f1da42478f98fa507bb34bc194a0553 Mon Sep 17 00:00:00 2001
+From: lukasberger <berger.lukas@gmail.com>
+Date: Sun, 31 Jan 2016 15:50:13 -0500
+Subject: [PATCH 2/6] make stack size configurable and add defaults
+
+---
+ 2/take5/dealer.py    | 8 ++++++--
+ 2/take5/main.py      | 4 +++-
+ 2/take5/test_main.py | 4 ++--
+ 3 files changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/2/take5/dealer.py b/2/take5/dealer.py
+index 84ced23..6a712f2 100644
+--- a/2/take5/dealer.py
++++ b/2/take5/dealer.py
+@@ -15,6 +15,7 @@ from player_state import PlayerState
+ 
+ TURNS_PER_ROUND = 10
+ MAX_BULL_POINTS = 66
++MAX_STACK_SIZE = 5
+ 
+ 
+ class Dealer:
+@@ -29,17 +30,20 @@ class Dealer:
+         self.stacks = None
+         self.turns = None
+         self.max_bull_points = None
++        self.max_stack_size = MAX_STACK_SIZE
+ 
+-    def game(self, turns=TURNS_PER_ROUND, max_bull_points=MAX_BULL_POINTS):
++    def game(self, turns=TURNS_PER_ROUND, max_bull_points=MAX_BULL_POINTS, max_stack_size=MAX_STACK_SIZE):
+         """ Simulates a complete game and returns the player id of the winner.
+         :param turns: number of turns to be played / cards to be given out
+         :param max_bull_points: maximum number of bull points each player can
+                                 have before a game ends
++        :param max_stack_size: maximum size of a stack before a player must pick it up
+         :return: the player id of the winner
+         """
+         self.player_states = [PlayerState(player) for player in self.players]
+         self.turns = turns
+         self.max_bull_points = max_bull_points
++        self.max_stack_size = max_stack_size
+ 
+         result = self.round(turns)
+ 
+@@ -144,7 +148,7 @@ class Dealer:
+             stack_index = topmost_card_values.index(card_value_to_place_on)
+             # if the stack had 5 cards -> pick up and replace with the given card
+             stack = self.stacks[stack_index]
+-            if len(stack) == 5:
++            if len(stack) == self.max_stack_size:
+                 player_state.bull_points += self.pick_up_stack_and_replace_with_card(stack_index, card)
+             else:
+                 stack.append(card)
+diff --git a/2/take5/main.py b/2/take5/main.py
+index af742ff..97382e6 100644
+--- a/2/take5/main.py
++++ b/2/take5/main.py
+@@ -18,6 +18,8 @@ sys.path.insert(0, PATH_TO_PLAYER)
+ from dealer import Dealer
+ from player import Player
+ 
++MAX_STACK_SIZE = 6
++
+ 
+ def simulate_game(num_players):
+     """ Simulate a game of 6Nimmt! for the given number of players.
+@@ -26,7 +28,7 @@ def simulate_game(num_players):
+     """
+     players = [Player(i, num_players) for i in range(num_players)]
+     dealer = Dealer(players)
+-    dealer.game()
++    dealer.game(max_stack_size=MAX_STACK_SIZE)
+     return dealer.stats()
+ 
+ 
+diff --git a/2/take5/test_main.py b/2/take5/test_main.py
+index 9bcf040..7f3ca33 100644
+--- a/2/take5/test_main.py
++++ b/2/take5/test_main.py
+@@ -11,6 +11,6 @@ class MainTests(TestCase):
+ 
+         simulate_game(10)
+         self.assertEqual(len(mock_dealer.call_args[0][0]), 10)
+-        mock_dealer.return_value.game.assert_called_once_with()
+-        mock_dealer.return_value.stats.assert_called_once_with()
++        self.assertTrue(mock_dealer.return_value.game.called)
++        self.assertTrue(mock_dealer.return_value.stats.called)
+ 
+-- 
+2.1.3
+

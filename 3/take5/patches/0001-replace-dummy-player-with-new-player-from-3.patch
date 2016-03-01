@@ -1,0 +1,42 @@
+From 79f04fec290b4ed6c5441ee903181e0abb8a4e08 Mon Sep 17 00:00:00 2001
+From: lukasberger <berger.lukas@gmail.com>
+Date: Sun, 31 Jan 2016 15:46:43 -0500
+Subject: [PATCH 1/6] replace dummy player with new player from 3
+
+---
+ 2/take5/main.py | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/2/take5/main.py b/2/take5/main.py
+index 4518ff8..af742ff 100644
+--- a/2/take5/main.py
++++ b/2/take5/main.py
+@@ -8,8 +8,15 @@ Usage: python main.py
+ 
+ """
+ 
++import os
++import sys
++
++# import player from 3
++PATH_TO_PLAYER = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..", "3", "take5")
++sys.path.insert(0, PATH_TO_PLAYER)
++
+ from dealer import Dealer
+-from dummy_player import DummyPlayer
++from player import Player
+ 
+ 
+ def simulate_game(num_players):
+@@ -17,7 +24,7 @@ def simulate_game(num_players):
+     :param num_players: number of players in the simulation
+     :return: an integer if an error occurred, otherwise None
+     """
+-    players = [DummyPlayer(i, num_players) for i in range(num_players)]
++    players = [Player(i, num_players) for i in range(num_players)]
+     dealer = Dealer(players)
+     dealer.game()
+     return dealer.stats()
+-- 
+2.1.3
+

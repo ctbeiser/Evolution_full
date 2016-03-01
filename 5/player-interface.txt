@@ -1,0 +1,142 @@
+  _____             _                 __  _____  _
+ |  __ \           | |               / / |  __ \| |
+ | |  | | ___  __ _| | ___ _ __     / /  | |__) | | __ _ _   _  ___ _ __
+ | |  | |/ _ \/ _` | |/ _ \ '__|   / /   |  ___/| |/ _` | | | |/ _ \ '__|
+ | |__| |  __/ (_| | |  __/ |     / /    | |    | | (_| | |_| |  __/ |
+ |_____/ \___|\__,_|_|\___|_|_   /_/     |_|    |_|\__,_|\__, |\___|_|
+ |_   _|     | |           / _|                           __/ |
+   | |  _ __ | |_ ___ _ __| |_ __ _  ___ ___             |___/
+   | | | '_ \| __/ _ \ '__|  _/ _` |/ __/ _ \
+  _| |_| | | | ||  __/ |  | || (_| | (_|  __/
+ |_____|_| |_|\__\___|_|  |_| \__,_|\___\___|
+
+
+
+Table of Contents:
+ 0. Introduction
+ 1. Data definitions
+ 2. Player interface
+ 3. Timing constraints
+
+
+0. Introduction
+
+This document outlines the interface between the Dealer and the Player
+components. The Player must implement the interface described in section 2.
+The Dealer will call methods according to timing constraints specified in
+section 3.
+
+
+1. Data Definitions
+
+NOTE: Data definitions include those from
+        http://www.ccs.neu.edu/home/matthias/4500-s16/5.html
+
+GameState is a dictionary in the following format:
+    {
+        "players": [Player, ..., Player],  # in order
+        "playerId": PlayerIdx,
+        "wateringHoleTokens": Nat
+    }
+
+Player is [Species, ... Species]
+
+PlayerIdx is a Nat representing the Player's position in the players array
+
+SpeciesIdx is a Nat representing the Species position in a Player list
+
+Direction is "left" or "right"
+
+CardAction is one of
+    ["add-trait", SpeciesIdx]
+    ["replace-trait", SpeciesIdx, Trait]
+    ["exchange-for-species"]
+    ["exchange-for-body", SpeciesIdx]
+    ["exchange-for-population", SpeciesIdx]
+    ["keep"]
+    ["discard"]
+
+FeedingAction is
+    [SpeciesIdx, PlayerIdx, SpeciesIdx], where the arguments represent
+        current player's species as the attacker, target player, target position
+        PlayerIdx and SpeciesIdx are ignored if the species is a vegetarian
+
+
+2. Player Interface
+
+Whenever the Player is asked to provider a PlayerIdx or SpeciesIdx it must
+ determine the correct index from the GameState. For example, given the
+ GameState
+    {
+        "players": [
+            [Species0, Species1, Species2],
+            [Species3, Species4]
+        ],
+        "playerId": 1,
+        "wateringHoleTokens": 0
+    },
+
+ if the player wants to attack Species1, the PlayerIdx will be 0 and
+ SpeciesIdx 1, and if the Player wants to attack their own species,
+ Species3, the PlayerIdx will be 1, and SpeciesIdx 0.
+
+
+class Player:
+
+    def __init__(self):
+        pass
+
+    def game_state_updated(self, game_state):
+        """ Called every time the game state is updated, this includes:
+                * changes to any player's species
+                * changes in the number of food tokens in the watering hole
+        :param game_state: state of the game
+        :return: None
+        """
+        pass
+
+    def place_species(self):
+        """ Called when the Player obtains a new Species board.
+        :return: direction to place then new species relative to existing
+        :rtype: Direction
+        """
+        pass
+
+
+    def use_cards(self, hand):
+        """ Given the Player's hand, decide what to do with each card.
+
+        Constraints:
+            * the number of returned CardActions must be the same as the hand size
+            * exactly one CardAction must be "discard"
+            * the actions must follow the game rules
+
+        If any of these constraints is violated, the game will make your choice.
+
+        :param hand: list of Card; the player's current hand
+        :return: list of CardAction
+        """
+        pass
+
+    def feed(self):
+        """ Choose a species to feed from the game states. If the species is a
+        carnivore a valid target player index and an index of one of the player's
+        species must also be provided.
+        :return: FeedingAction
+        """
+        pass
+
+
+3. Timing constraints
+
+    game_state_updated is called:
+        * as soon as the game begins, preceding any other method calls
+        * any time the game state changes (including changes on any
+            species and the number of tokens in the watering hole)
+
+    places_species is called when the player receives a new species board
+
+    use_cards is called once per turn before the feeding phase
+
+    feed is called when a player is required to choose a species to feed
+        according to the rules
