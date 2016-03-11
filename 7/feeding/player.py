@@ -141,7 +141,7 @@ class Player:
         # greatest need for fat food: the body size of the species
         if len(species_with_fat_tissue) > 0:
             species_with_greatest_need = self._find_max_values(species_with_fat_tissue,
-                                                               lambda species: species.body)
+                                                               lambda species: species.body-species.fat_food)
 
             eater = self.order_species(species_with_greatest_need)[0]
             food_to_request = min(eater.body - eater.fat_food, watering_hole)
