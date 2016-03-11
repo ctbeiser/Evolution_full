@@ -1,10 +1,10 @@
 """ Represents a Player for the Evolution game
 """
 
-from .trait import Trait
+from trait import Trait
 
-from .species import Species
-from .feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, CannotFeed
+from species import Species
+from feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, CannotFeed
 
 DEFAULT_BAG_VALUE = 0
 

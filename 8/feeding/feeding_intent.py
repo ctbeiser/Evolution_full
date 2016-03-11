@@ -18,7 +18,7 @@ class FeedingIntent:
 
 
 class CannotFeed(FeedingIntent):
-    """ Represents the intention to not feed any species. """
+    """ Represents the inability to feed any species. """
 
     def serialize(self):
         raise ValueError("Cannot feed cannot be serialized.")

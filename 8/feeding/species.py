@@ -3,7 +3,7 @@
 Represents a Species in the Evolution game.
 
 """
-from .trait import Trait, HARD_SHELL_THRESHOLD
+from trait import Trait, HARD_SHELL_THRESHOLD
 
 
 SPECIES_DEFAULT_FOOD = 0

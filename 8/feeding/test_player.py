@@ -3,10 +3,10 @@ import json
 
 from unittest import TestCase
 
-from .species import Species
-from .trait import Trait
-from .player import Player
-from .feeding_intent import FeedNone, FeedVegetarian, StoreFat, FeedCarnivore, CannotFeed
+from species import Species
+from trait import Trait
+from player import Player
+from feeding_intent import FeedNone, FeedVegetarian, StoreFat, FeedCarnivore, CannotFeed
 
 
 class PlayerTestCase(TestCase):
