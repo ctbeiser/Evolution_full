@@ -11,7 +11,7 @@ DEFAULT_BAG_VALUE = 0
 
 class Player:
 
-    def __init__(self, player_id, species=None, bag=DEFAULT_BAG_VALUE):
+    def __init__(self, player_id, species=None, bag=DEFAULT_BAG_VALUE, cards=[]):
         """ Initialize a new Player
         :param player_id: id of the player as a Natural number greater than 0
         :param species: a list of Species or None
@@ -20,16 +20,20 @@ class Player:
         self.player_id = player_id
         self.species = species or []
         self.bag = bag
+        self.cards = cards
 
     def serialize(self):
         """ Returns a serialized version of the Player
         :return: serialized version of the Player
         """
-        return [
+        serialized = [
             ["id", self.player_id],
             ["species", [species.serialize() for species in self.species]],
             ["bag", self.bag],
         ]
+        if self.cards:
+            serialized.append(["cards", [card.serialize() for card in self.cards]])
+        return serialized
 
     @classmethod
     def deserialize(cls, data):
@@ -44,10 +48,15 @@ class Player:
 
         species = [Species.deserialize(species) for species in parameters['species']]
 
+        cards = []
+        if 'cards' in parameters:
+            cards = [card.deserialize() for card in parameters['cards']]
+
         return cls(
             player_id=parameters['id'],
             species=species,
             bag=parameters['bag'],
+            cards=cards
         )
 
     @staticmethod

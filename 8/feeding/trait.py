@@ -14,4 +14,3 @@ traits = ["carnivore", "ambush", "burrowing", "climbing", "cooperation",
 trait_mapping = {trait.upper().replace("-", "_"): trait for trait in traits}
 
 Trait = Enum("Trait", trait_mapping)
-

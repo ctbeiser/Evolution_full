@@ -43,6 +43,7 @@ class PlayerTestCase(TestCase):
             (4, [], 4),
             (4, [self.species_fed_veg.serialize()], 4),
             (4, [self.species_fed_veg.serialize(), self.species_fed_fat.serialize()], 4),
+            (4, [self.species_fed_veg.serialize(), self.species_fed_fat.serialize()], 4),
         ]
 
         for pid, species, bag in player_data_values:
@@ -58,6 +59,7 @@ class PlayerTestCase(TestCase):
                 self.assertEqual(species_obj.serialize(), species_data)
 
             self.assertEqual(player.serialize(), data)
+
 
     def test_order_species(self):
 
