@@ -1,0 +1,41 @@
+def fill_food_bag(self):
+""" Removes all food from each Species owned by the player and adds it to their food bag
+"""
+
+def pick_up_cards(self, cards):
+""" Adds all of the given cards to a players hand 
+    :param cards: The list of cards
+"""
+
+def flip_traits(self):
+""" Reveals all 'face down' trait cards on owned species boards and removes old trait cards when necessary
+	:return: A list of trait cards to be discarded
+"""
+
+def play_cards(self):
+""" Allows the player to make use of cards as established in the rules, and 
+have them alter the players state based on their effects  
+    :return: A list of trait cards to be discarded
+"""
+
+def discard(self):
+""" Returns a card to be discarded to provide food for the watering hole 
+	:return: A card to be discarded 
+"""
+
+def add_species_board_right(self):
+""" Determines whether to add a new species board to the left or right of currently owned species boards 
+	:return: A boolean indicating whether to add the board to the right or not
+"""
+
+def choose_next_feeding(self, players):
+""" Determines the next feeding to occur based on the player strategy/input
+	:param players: A list of the current players
+	:return: A FeedingIntent (representation of a type of feeding to occur)
+"""
+
+@property
+def get_score(self):
+""" Determines the players score
+	:return: An integer value of the players score
+"""
