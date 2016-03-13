@@ -3,10 +3,10 @@ import json
 
 from unittest import TestCase
 
-from species import Species
-from trait import Trait
-from player import Player
-from feeding_intent import FeedNone, FeedVegetarian, StoreFat, FeedCarnivore, CannotFeed
+from .species import Species
+from .trait import Trait
+from .player import Player
+from .feeding_intent import FeedNone, FeedVegetarian, StoreFat, FeedCarnivore, CannotFeed
 
 
 class PlayerTestCase(TestCase):
@@ -240,13 +240,13 @@ class PlayerTestCase(TestCase):
     def test_get_neighbors(self):
         player = Player(1, species=[self.species_car_0, self.species_car_1, self.species_car_2])
 
-        self.assertEqual(player._get_neighbors(self.species_car_0), (None, self.species_car_1))
-        self.assertEqual(player._get_neighbors(self.species_car_1), (self.species_car_0, self.species_car_2))
-        self.assertEqual(player._get_neighbors(self.species_car_2), (self.species_car_1, None))
+        self.assertEqual(player.get_neighbors(self.species_car_0), (None, self.species_car_1))
+        self.assertEqual(player.get_neighbors(self.species_car_1), (self.species_car_0, self.species_car_2))
+        self.assertEqual(player.get_neighbors(self.species_car_2), (self.species_car_1, None))
 
         player2 = Player(1, species=[self.species_car_0, self.species_car_1])
-        self.assertEqual(player2._get_neighbors(self.species_car_0), (None, self.species_car_1))
-        self.assertEqual(player2._get_neighbors(self.species_car_1), (self.species_car_0, None))
+        self.assertEqual(player2.get_neighbors(self.species_car_0), (None, self.species_car_1))
+        self.assertEqual(player2.get_neighbors(self.species_car_1), (self.species_car_0, None))
 
     def test_find_max_values(self):
         self.assertEqual(Player._find_max_values([5, 7, 999, 8, 999], lambda x: x), [999, 999])

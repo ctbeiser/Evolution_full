@@ -1,9 +1,10 @@
+from .trait import Trait
+
 """
     Contains all feeding intents that can be returned by a Player as a
      response to a dealers's call to choose the next species to feed.
      Each intent implements a serialize method that generates a data
      representation for the intent according to the JSON data specification.
-
 """
 
 
@@ -15,6 +16,15 @@ class FeedingIntent:
         :return: data representation
         """
         raise NotImplementedError()
+
+    def enact(self, player, others, feed, fat_feed):
+        """ Modifies players to carry out this feeding
+        :param player: Player that is feeding
+        :param others: List of the other Players
+        :param feed: A function to feed a creature, documented as feed_creature in Dealer.py
+        :param fat_feed: A function to feed a creature fat tokens, documented as fat_feed in Dealer.py
+        """
+        pass
 
 
 class CannotFeed(FeedingIntent):
@@ -53,11 +63,15 @@ class StoreFat(FeedSpecies):
     def serialize(self):
         return [self.species_index, self.tokens]
 
+    def enact(self, player, others, feed, fat_feed):
+        fat_feed(player, self.species_index, self.tokens)
+
 
 class FeedVegetarian(FeedSpecies):
     """ Represents the intention to feed the vegetarian species at the given
      index in the Player's species list """
-    pass
+    def enact(self, player, others, feed, fat_feed):
+        feed(player, self.species_index)
 
 
 class FeedCarnivore(FeedSpecies):
@@ -70,3 +84,20 @@ class FeedCarnivore(FeedSpecies):
 
     def serialize(self):
         return [self.species_index, self.player_index, self.defender_index]
+
+    def enact(self, player, others, feed, fat_feed):
+        defender = others[self.player_index].species[self.defender_index]
+        attacker = player.species[self.species_index]
+        has_horns = defender.has_trait(Trait.HORNS)
+
+        defender.population -= 1
+        attacker.population -= has_horns
+
+        if defender.population == 0:
+            others[self.player_index].species.pop(self.defender_index)
+
+        if attacker.population == 0:
+            player.species.pop(self.species_index)
+
+        else:
+            feed(player, self.species_index, scavenge=True)

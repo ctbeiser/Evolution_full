@@ -1,10 +1,10 @@
 """ Represents a Player for the Evolution game
 """
 
-from trait import Trait
+from .trait import Trait
 
-from species import Species
-from feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, CannotFeed
+from .species import Species
+from .feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, CannotFeed
 
 DEFAULT_BAG_VALUE = 0
 
@@ -91,7 +91,7 @@ class Player:
 
         return sorted(species_list, key=ordering)
 
-    def _get_neighbors(self, species):
+    def get_neighbors(self, species):
         """ Returns the left and right neighbor of the given species.
         :param species: species to find the neighbors of
         :return: a tuple of (left, right) neighbor, where either can be None
@@ -111,10 +111,27 @@ class Player:
         :return: list of species attackable by the attacker
         """
         def is_attackable(species):
-            left, right = self._get_neighbors(species)
+            left, right = self.get_neighbors(species)
             return species.is_attackable(attacker, left=left, right=right)
 
         return [species for species in self.species if is_attackable(species)]
+
+    def automatically_choose_species_to_feed(self, players):
+        """ If there's only one possibility, produce an intent that can be automatically carried out by the dealer.
+        :param players: A list of all other players
+        :return: An FeedingIntent or None
+        """
+        # feed_fat_tissue will produce the same results, though different intents, regardless of watering hole depth
+        if self.feed_on_own() or self.feed_fat_tissue(1):
+            return None
+        if len([species for species in self.species if species.is_hungry and
+                not species.has_trait(Trait.CARNIVORE)]) == 1 and not self.feed_carnivore(players):
+            return self.feed_vegetarian()
+        else:
+            hungry_carnivores = [species for species in self.species if species.has_trait(Trait.CARNIVORE) and species.is_hungry]
+            targets = [player.get_attackable_species(candidate) for player in players for candidate in hungry_carnivores]
+            if len(targets) == 1 and len(targets[0]) == 1:
+                return self.feed_carnivore(players)
 
     def next_species_to_feed(self, players, watering_hole):
         """ Determines the next species to feed, given the other players
