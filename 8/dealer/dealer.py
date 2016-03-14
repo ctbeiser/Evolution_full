@@ -2,6 +2,7 @@ from feeding.trait import Trait
 from feeding.player import Player
 from .traitcard import TraitCard
 
+
 class Dealer:
     def __init__(self, players, watering_hole, deck):
         """ Initialize a new Dealer

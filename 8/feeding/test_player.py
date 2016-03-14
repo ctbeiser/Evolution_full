@@ -7,7 +7,7 @@ from .species import Species
 from .trait import Trait
 from .player import Player
 from .feeding_intent import FeedNone, FeedVegetarian, StoreFat, FeedCarnivore, CannotFeed
-
+from dealer.traitcard import TraitCard
 
 class PlayerTestCase(TestCase):
 
@@ -45,7 +45,6 @@ class PlayerTestCase(TestCase):
             (4, [self.species_fed_veg.serialize(), self.species_fed_fat.serialize()], 4),
             (4, [self.species_fed_veg.serialize(), self.species_fed_fat.serialize()], 4),
         ]
-
         for pid, species, bag in player_data_values:
             data = [["id", pid], ["species", species], ["bag", bag]]
 
@@ -53,6 +52,7 @@ class PlayerTestCase(TestCase):
             self.assertIsInstance(player, Player)
             self.assertEqual(player.player_id, pid)
             self.assertEqual(player.bag, bag)
+            self.assertCountEqual(player.cards, [])
 
             for species_obj, species_data in zip(player.species, species):
 
@@ -60,6 +60,18 @@ class PlayerTestCase(TestCase):
 
             self.assertEqual(player.serialize(), data)
 
+            cards = [TraitCard(1, Trait("carnivore")), TraitCard(1, Trait("carnivore"))]
+            card_data = [c.serialize() for c in cards]
+
+            data.append(["cards", card_data])
+
+            player = Player.deserialize(data)
+            self.assertIsInstance(player, Player)
+            self.assertEqual(player.player_id, pid)
+            self.assertEqual(player.bag, bag)
+            self.assertEqual(len(player.cards), len(cards))
+            self.assertEqual(player.cards[0].food_value, 1)
+            self.assertEqual(player.cards[0].trait, Trait.CARNIVORE)
 
     def test_order_species(self):
 

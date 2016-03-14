@@ -21,7 +21,7 @@ class TraitCard:
         """ Returns a serialized version of the Card
         :return: serialized version of the Card
         """
-        return [self.food_value, self.trait.name]
+        return [self.food_value, self.trait.serialize()]
 
     @classmethod
     def deserialize(cls, data):

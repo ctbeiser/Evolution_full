@@ -5,6 +5,7 @@ from .trait import Trait
 
 from .species import Species
 from .feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, CannotFeed
+from dealer.traitcard import TraitCard
 
 DEFAULT_BAG_VALUE = 0
 
@@ -50,7 +51,7 @@ class Player:
 
         cards = []
         if 'cards' in parameters:
-            cards = [card.deserialize() for card in parameters['cards']]
+            cards = [TraitCard.deserialize(card) for card in parameters['cards']]
 
         return cls(
             player_id=parameters['id'],
