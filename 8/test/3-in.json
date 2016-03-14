@@ -1,83 +1,42 @@
 [
      [
           [
-               "id",
-               1
-          ],
-          [
-               "species",
                [
+                    "id",
+                    1
+               ],
+               [
+                    "species",
                     [
                          [
-                              "food",
-                              0
-                         ],
-                         [
-                              "body",
-                              0
-                         ],
-                         [
-                              "population",
-                              2
-                         ],
-                         [
-                              "traits",
-                              []
-                         ]
-                    ],
-                    [
-                         [
-                              "food",
-                              2
-                         ],
-                         [
-                              "body",
-                              1
-                         ],
-                         [
-                              "population",
-                              2
-                         ],
-                         [
-                              "traits",
                               [
-                                   "fat-tissue"
-                              ]
-                         ],
-                         [
-                              "fat-food",
-                              1
-                         ]
-                    ],
-                    [
-                         [
-                              "food",
-                              2
-                         ],
-                         [
-                              "body",
-                              0
-                         ],
-                         [
-                              "population",
-                              2
-                         ],
-                         [
-                              "traits",
+                                   "food",
+                                   5
+                              ],
                               [
-                                   "carnivore"
+                                   "body",
+                                   1
+                              ],
+                              [
+                                   "population",
+                                   8
+                              ],
+                              [
+                                   "traits",
+                                   [
+                                        "scavenger",
+                                        "carnivore",
+                                        "foraging"
+                                   ]
                               ]
                          ]
                     ]
+               ],
+               [
+                    "bag",
+                    3
                ]
           ],
-          [
-               "bag",
-               0
-          ]
-     ],
-     1,
-     [
           [
                [
                     "id",
@@ -89,15 +48,35 @@
                          [
                               [
                                    "food",
-                                   0
+                                   1
                               ],
                               [
                                    "body",
-                                   0
+                                   1
                               ],
                               [
                                    "population",
+                                   2
+                              ],
+                              [
+                                   "traits",
+                                   [
+                                        "carnivore"
+                                   ]
+                              ]
+                         ],
+                         [
+                              [
+                                   "food",
                                    1
+                              ],
+                              [
+                                   "body",
+                                   1
+                              ],
+                              [
+                                   "population",
+                                   3
                               ],
                               [
                                    "traits",
@@ -108,7 +87,7 @@
                ],
                [
                     "bag",
-                    0
+                    2
                ]
           ],
           [
@@ -122,19 +101,21 @@
                          [
                               [
                                    "food",
-                                   0
-                              ],
-                              [
-                                   "body",
-                                   0
-                              ],
-                              [
-                                   "population",
                                    1
                               ],
                               [
+                                   "body",
+                                   1
+                              ],
+                              [
+                                   "population",
+                                   2
+                              ],
+                              [
                                    "traits",
-                                   []
+                                   [
+                                        "horns"
+                                   ]
                               ]
                          ]
                     ]
@@ -142,7 +123,35 @@
                [
                     "bag",
                     0
+               ],
+               [
+                    "cards",
+                    [
+                         [
+                              -5,
+                              "long-neck"
+                         ],
+                         [
+                              -5,
+                              "carnivore"
+                         ],
+                         [
+                              0,
+                              "long-neck"
+                         ]
+                    ]
                ]
+          ]
+     ],
+     10,
+     [
+          [
+               -5,
+               "long-neck"
+          ],
+          [
+               -5,
+               "carnivore"
           ]
      ]
 ]

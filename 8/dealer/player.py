@@ -11,7 +11,7 @@ DEFAULT_BAG_VALUE = 0
 
 class Player:
 
-    def __init__(self, player_id, species=None, bag=DEFAULT_BAG_VALUE, cards=[]):
+    def __init__(self, player_id, species=None, bag=DEFAULT_BAG_VALUE, cards=None):
         """ Initialize a new Player
         :param player_id: id of the player as a Natural number greater than 0
         :param species: a list of Species or None
@@ -20,7 +20,7 @@ class Player:
         self.player_id = player_id
         self.species = species or []
         self.bag = bag
-        self.cards = cards
+        self.cards = cards or []
 
     def serialize(self):
         """ Returns a serialized version of the Player

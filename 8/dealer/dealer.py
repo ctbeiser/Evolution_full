@@ -3,7 +3,7 @@ from .player import Player
 from .traitcard import TraitCard
 
 class Dealer:
-    def __init__(self, players, watering_hole, deck):
+    def __init__(self, players, watering_hole, deck=None):
         """ Initialize a new Dealer
         :param players: A list of Player
         :param watering_hole: Integer
@@ -18,7 +18,7 @@ class Dealer:
         """ Produce a serialized representation of a Dealer according to the specification
         :return: An array of [LOP+, Natural, LOC]
         """
-        return [[p.serialize() for p in self.players], self.watering_hole, [c.serialize for c in self.deck]]
+        return [[p.serialize() for p in self.players], self.watering_hole, [c.serialize() for c in self.deck]]
 
     @classmethod
     def deserialize(cls, data):
