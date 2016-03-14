@@ -10,4 +10,4 @@ configuration = json.loads(data)
 dealer = Dealer.deserialize(configuration)
 dealer.feed_one(dealer.players)
 
-sys.stdout.write(dealer.serialize())
+sys.stdout.write(json.dumps(dealer.serialize()))
