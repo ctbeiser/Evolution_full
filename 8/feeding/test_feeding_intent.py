@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from .player import Player
 from .species import Species
 from .trait import Trait
-from .feeding_intent import FeedCarnivore, FeedVegetarian, StoreFat
+from .feeding_intent import FeedCarnivore, FeedVegetarian, StoreFat, CannotFeed, FeedNone
 
 BIG_SIZE = 4
 LITTLE_SIZE = 2
@@ -97,3 +97,27 @@ class FeedingIntentTestCase(TestCase):
                 player.assert_not_called()
                 not_called.assert_not_called()
                 mock.assert_called_once_with(player, idx, tkns)
+
+    def test_serialize_fat_tissue(self):
+        for x in range(2):
+            for y in range(2):
+                    self.assertEqual(StoreFat(x, y).serialize(), [x, y])
+
+    def test_cant_feed(self):
+        cant_feed = CannotFeed()
+        not_called = Mock()
+        player = Mock()
+        cant_feed.enact(player, [], not_called, not_called)
+        player.assert_not_called()
+        not_called.assert_not_called()
+
+    def test_feed_none(self):
+        feed_none = FeedNone()
+        not_called = Mock()
+        player = Mock()
+        feed_none.enact(player, [], not_called, not_called)
+        player.assert_not_called()
+        not_called.assert_not_called()
+
+    def test_serialize_feed_none(self):
+        self.assertEqual(FeedNone().serialize(), False)

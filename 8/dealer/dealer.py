@@ -1,5 +1,5 @@
-from feeding.trait import Trait
-from feeding.player import Player
+from .trait import Trait
+from .player import Player
 from .traitcard import TraitCard
 
 
@@ -35,7 +35,7 @@ class Dealer:
         first_player = players_feeding[0]
         rest_players = [p for p in self.players if p is not first_player]
 
-        intent = first_player.auto_transfer_food(rest_players) or \
+        intent = first_player.automatically_choose_species_to_feed(rest_players) or \
                  first_player.next_species_to_feed(rest_players, self.watering_hole)
         intent.enact(first_player, rest_players, self.feed_creature, self.fat_feed)
 
@@ -56,7 +56,7 @@ class Dealer:
         self.watering_hole -= feed_amount
 
         if species.has_trait(Trait.COOPERATION):
-            right = player.get_neighbors()[1]
+            right = player.get_neighbors(species)[1]
             if right:
                 self.feed_creature(player, species_index+1)
 
@@ -65,7 +65,7 @@ class Dealer:
             for i in range(len(self.players)):
                 player = self.players[(idx+i)%len(self.players)]
                 for s in player.species:
-                    if s.hasTrait(Trait.SCAVENGER):
+                    if s.has_trait(Trait.SCAVENGER):
                         self.feed_creature(player, player.species.index(s))
 
     def fat_feed(self, player, species_index, tokens):
@@ -75,6 +75,6 @@ class Dealer:
         :param species_index: Index of species on that player as an Integer
         :param tokens: Integer number of tokens to transfer from the watering hole
         """
-        species = player[species_index]
+        species = player.species[species_index]
         species.fat_food += tokens
         self.watering_hole -= tokens
