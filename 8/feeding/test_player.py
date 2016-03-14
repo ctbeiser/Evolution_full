@@ -52,7 +52,7 @@ class PlayerTestCase(TestCase):
             self.assertIsInstance(player, Player)
             self.assertEqual(player.player_id, pid)
             self.assertEqual(player.bag, bag)
-            self.assertCountEqual(player.cards, [])
+            self.assertEqual(len(player.cards), len([]))
 
             for species_obj, species_data in zip(player.species, species):
 
@@ -60,7 +60,7 @@ class PlayerTestCase(TestCase):
 
             self.assertEqual(player.serialize(), data)
 
-            cards = [TraitCard(1, Trait("carnivore")), TraitCard(1, Trait("carnivore"))]
+            cards = [TraitCard(1, Trait("long-neck")), TraitCard(1, Trait("carnivore"))]
             card_data = [c.serialize() for c in cards]
 
             data.append(["cards", card_data])
@@ -71,7 +71,7 @@ class PlayerTestCase(TestCase):
             self.assertEqual(player.bag, bag)
             self.assertEqual(len(player.cards), len(cards))
             self.assertEqual(player.cards[0].food_value, 1)
-            self.assertEqual(player.cards[0].trait, Trait.CARNIVORE)
+            self.assertEqual(player.cards[0].trait, Trait.LONG_NECK)
 
     def test_order_species(self):
 
