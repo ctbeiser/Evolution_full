@@ -1,4 +1,4 @@
-from feeding.trait import Trait
+from trait import Trait
 
 # Because range is inclusive only on the bottom
 FOOD_VALUE_RANGE = range(-8, 8+1)
@@ -6,10 +6,9 @@ FOOD_VALUE_RANGE = range(-8, 8+1)
 
 class TraitCard:
     def __init__(self, food_value, trait):
-        """
+        """ Represents a Card with a Trait and a quantity of Food
         :param food_value: An Integer between -8 and 8
         :param trait: A Trait
-        :return:
         """
         if food_value in FOOD_VALUE_RANGE:
             self.food_value = food_value
@@ -26,8 +25,9 @@ class TraitCard:
     @classmethod
     def deserialize(cls, data):
         """ Given a serialized Card,
-        :param data: A list of [foodValue, name] where the former is
-        :return:
+        :param data: A list of [foodValue, name] where the former is between
+        -8 and 8, and the latter is a serialized trait
+        :return: a new TraitCard
         """
         food_value, name = data
         return cls(food_value, Trait(name))
