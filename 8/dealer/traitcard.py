@@ -1,6 +1,6 @@
 from feeding.trait import Trait
 
-#Because range is inclusive only on the bottom
+# Because range is inclusive only on the bottom
 FOOD_VALUE_RANGE = range(-8, 8+1)
 
 
