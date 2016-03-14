@@ -38,8 +38,6 @@ Code can be read by beginning with xstep.py which creates a Dealer object from d
 The tests can be run with the following command:
     python3 -m unittest
 
- The xfeed tests can be run from the assignment root with:
-    for i in {1..5}; do ./xfeed < test/$i-in.json | cmp test/$i-out.json; done
+ The xstep tests can be run from the assignment root with:
+    for i in {1..5}; do ./xstep < test/$i-in.json | cmp test/$i-out.json; done
 
- The xstream tests can be run from Streaming with:
-    for i in {1..5}; do ./xstream < test/$i-in.json | cmp test/$i-out.json; done
