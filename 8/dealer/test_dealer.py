@@ -32,6 +32,18 @@ class DealerTestCase(TestCase):
 
         self.dealer1 = Dealer([self.attackPlayer, self.defendPlayer, self.hornDefendPlayer, self.cooperatingPlayer], 10, [])
 
+        self.dealer1_in = Dealer([self.attackPlayer, self.defendPlayer, self.hornDefendPlayer, self.cooperatingPlayer], 10, [])
+        self.species_small_veg.food = 2;
+        self.dealer1_out = Dealer([self.attackPlayer, self.defendPlayer, self.hornDefendPlayer, self.cooperatingPlayer], 9, [])
+
+        self.dealer2_in = Dealer([self.hornDefendPlayer, self.defendPlayer, self.attackPlayer], 0, [])
+        self.dealer2_out = Dealer([self.hornDefendPlayer, self.defendPlayer, self.attackPlayer], 0, [])
+
+        self.dealer3_in = Dealer([self.cooperatingPlayer, self.defendPlayer, self.hornDefendPlayer], 3, [])
+        self.species_cooperating_scavenger.food = 2;
+        self.species_hungry_forrager.food = 3;
+        self.dealer3_out = Dealer([self.cooperatingPlayer, self.defendPlayer, self.hornDefendPlayer], 0, [])
+
     def test_feed_creature(self):
         self.dealer1.feed_creature(self.attackPlayer, self.attackPlayer.species.index(self.species_big_car), scavenge=False)
         self.assertEqual(self.species_big_car.food, 1+1)
@@ -94,7 +106,9 @@ class DealerTestCase(TestCase):
             out_file.write("\n")
 
     def generate_xfeed_cases(self):
-        test_cases = [(self.dealer1, 5)]
+        test_cases = [(self.dealer1_in , self.dealer1_out),
+                      (self.dealer2_in , self.dealer2_out),
+                      (self.dealer3_in , self.dealer3_out),]
         for case_number, (situation, expected) in enumerate(test_cases):
             self.generate_json_case(case_number + 1, situation, expected)
 
