@@ -34,8 +34,10 @@ class Dealer:
         first_player = players_feeding[0]
         rest_players = [p for p in self.players if p is not first_player]
 
-        intent = first_player.automatically_choose_species_to_feed(rest_players) or \
-                 first_player.next_species_to_feed(rest_players, self.watering_hole)
+                 # Insert the line below when asking players for their choice of species is enabled.
+                 # first_player.automatically_choose_species_to_feed(rest_players) or \
+        intent = first_player.next_species_to_feed(rest_players, self.watering_hole)
+
         intent.enact(first_player, rest_players, self.feed_creature, self.fat_feed)
 
     def feed_creature(self, player, species_index, scavenge=False):

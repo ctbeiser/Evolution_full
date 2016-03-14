@@ -2,24 +2,25 @@ Purpose: Implement Dealer class and a method "feed_one" to handle feedings
 
 dealer/dealer.py
 	Contains a representation of the Dealer in the game
-dealer/test_dealer.py
-	Tests for dealer.py
 dealer/traitcard.py
 	Contains a representation of Trait Cards in the game
-feeding/feeding_intent.py
+dealer/feeding_intent.py
 	Contains all possible feeding intents returnable by Player
-feeding/player.py
+dealer/player.py
 	Contains a representation of Player in the game
-feeding/species.py
+dealer/species.py
 	Contains a representation of Species boards in the game
-feeding/test_feeding_intent.py
+Tests:
+dealer/test_feeding_intent.py
 	Tests for feeding_intent.py
-feeding/test_player.py
+dealer/test_player.py
 	Tests for player.py
-feeding/test_species.py
+dealer/test_species.py
 	Tests for species.py
 feeding/trait.py
-	Contains the representation of traits in the game
+dealer/test_dealer.py
+	Tests for dealer.py
+
 
 test/*
 	JSON Test files for project test harness. Input files are denoted as X-in.json, output files as X-out.json
