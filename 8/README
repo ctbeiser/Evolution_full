@@ -30,6 +30,8 @@ rest.txt
 xstep.py
 	A test harness for testing 'feed_one' method in Dealer. Accepts input from stdin and outputs to stdout
 
+xstep
+	A bash script that calls xstep.py
 compile
 	Exits with code 0
 
