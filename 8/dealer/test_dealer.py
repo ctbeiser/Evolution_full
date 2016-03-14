@@ -1,8 +1,8 @@
 from unittest import TestCase, mock
 from .dealer import Dealer
-from .player import Player
-from .species import Species
-from .trait import Trait
+from feeding.player import Player
+from feeding.species import Species
+from feeding.trait import Trait
 
 BIG_SIZE = 4
 LITTLE_SIZE = 2
@@ -37,10 +37,14 @@ class DealerTestCase(TestCase):
         self.assertEqual(self.dealer1.serialize(), [[self.attackPlayer, self.defendPlayer, self.hornDefendPlayer, self.cooperatingPlayer], 10, []])
 
     def test_deserialize(self):
-        dealer2 = Dealer.deserialize([[self.attackPlayer, self.defendPlayer, self.hornDefendPlayer, self.cooperatingPlayer], 10, []])
-        assertEqual(dealer1.players, dealer2.players)
-        assertEqual(dealer1.watering_hole, dealer2.watering_hole)
-        assertEqual(dealer1.deck, dealer2.deck)
+        dealer2 = Dealer.deserialize([[self.attackPlayer.serialize(), self.defendPlayer.serialize(), self.hornDefendPlayer.serialize(), self.cooperatingPlayer.serialize()], 10, []])
+        for p in range(len(self.dealer1.players)):
+            self.assertEqual(self.dealer1.players[p].player_id, dealer2.players[p].player_id)
+            self.assertEqual(len(self.dealer1.players[p].species), len(dealer2.players[p].species))
+            self.assertEqual(self.dealer1.players[p].bag, dealer2.players[p].bag)
+            self.assertEqual(self.dealer1.players[p].cards, dealer2.players[p].cards)
+        self.assertEqual(self.dealer1.watering_hole, dealer2.watering_hole)
+        self.assertEqual(self.dealer1.deck, dealer2.deck)
 
     def test_feed_one(self):
         self.dealer1.feed_one(self.dealer1.players)

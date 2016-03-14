@@ -1,5 +1,5 @@
-from .trait import Trait
-from .player import Player
+from feeding.trait import Trait
+from feeding.player import Player
 from .traitcard import TraitCard
 
 
