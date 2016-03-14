@@ -3,6 +3,7 @@ from .dealer import Dealer
 from .player import Player
 from .species import Species
 from .trait import Trait
+from .traitcard import TraitCard
 import os
 import json
 
@@ -24,28 +25,39 @@ class DealerTestCase(TestCase):
         self.species_full_cooperate = Species(food=1, population=TINY, body=1, traits=[Trait.COOPERATION])
         self.species_hungry_forrager = Species(food=1, population=BIG_SIZE, body=1, traits= [Trait.FORAGING])
         self.species_cooperating_scavenger = Species(food=1, population=BIG_SIZE, body=1, traits=[Trait.SCAVENGER, Trait.COOPERATION])
+        self.species_attacker_scavenger = Species(food=1, population=8, body=1, traits=[Trait.SCAVENGER, Trait.CARNIVORE, Trait.FORAGING])
 
-        self.attackPlayer = Player(1, species=[self.species_big_car, self.species_small_veg, self.species_tiny_car])
-        self.defendPlayer = Player(2, species=[self.species_small_car, self.species_big_veg])
-        self.hornDefendPlayer = Player(3, species=[self.species_horn_veg])
+        self.attackPlayer = Player(1, species=[self.species_big_car, self.species_small_veg, self.species_tiny_car], bag=5)
+        self.scavengingAttackerPlayer = Player(1, species=[self.species_attacker_scavenger], bag=3)
+        self.defendPlayer = Player(2, species=[self.species_small_car, self.species_big_veg], bag=2)
+        self.hornDefendPlayer = Player(3, species=[self.species_horn_veg], cards=[TraitCard(-5, Trait("long-neck")),
+                                                                                  TraitCard(-5, Trait("carnivore")),
+                                                                                  TraitCard(0, Trait("long-neck"))])
         self.cooperatingPlayer = Player(4, species=[self.species_cooperating_scavenger, self.species_hungry_forrager])
 
-        self.dealer1 = Dealer([self.attackPlayer, self.defendPlayer, self.hornDefendPlayer, self.cooperatingPlayer], 10, [])
+        self.dealer1 = Dealer([self.attackPlayer, self.defendPlayer, self.hornDefendPlayer, self.cooperatingPlayer],
+                              10, [])
+        self.dealer3 = Dealer([self.scavengingAttackerPlayer, self.defendPlayer, self.cooperatingPlayer],
+                              10, [TraitCard(-5, "long-neck"), TraitCard(-5, "carnivore"), TraitCard(0, "long-neck")])
 
     def test_feed_creature(self):
-        self.dealer1.feed_creature(self.attackPlayer, self.attackPlayer.species.index(self.species_big_car), scavenge=False)
+        self.dealer1.feed_creature(self.attackPlayer, self.attackPlayer.species.index(self.species_big_car),
+                                   scavenge=False)
         self.assertEqual(self.species_big_car.food, 1+1)
 
     def test_serialize(self):
-        self.assertEqual(self.dealer1.serialize(), [[self.attackPlayer.serialize(), self.defendPlayer.serialize(), self.hornDefendPlayer.serialize(), self.cooperatingPlayer.serialize()], 10, []])
+        self.assertEqual(self.dealer1.serialize(), [[self.attackPlayer.serialize(), self.defendPlayer.serialize(),
+                                                     self.hornDefendPlayer.serialize(), self.cooperatingPlayer.serialize()], 10, []])
 
     def test_deserialize(self):
-        dealer2 = Dealer.deserialize([[self.attackPlayer.serialize(), self.defendPlayer.serialize(), self.hornDefendPlayer.serialize(), self.cooperatingPlayer.serialize()], 10, []])
+        dealer2 = Dealer.deserialize([[self.attackPlayer.serialize(), self.defendPlayer.serialize(),
+                                       self.hornDefendPlayer.serialize(), self.cooperatingPlayer.serialize()], 10, []])
         for p in range(len(self.dealer1.players)):
             self.assertEqual(self.dealer1.players[p].player_id, dealer2.players[p].player_id)
             self.assertEqual(len(self.dealer1.players[p].species), len(dealer2.players[p].species))
             self.assertEqual(self.dealer1.players[p].bag, dealer2.players[p].bag)
-            self.assertEqual(self.dealer1.players[p].cards, dealer2.players[p].cards)
+            for idx in range(len(self.dealer1.players[p].cards)):
+                self.assertEqual(self.dealer1.players[p].cards[idx].serialize(), dealer2.players[p].cards[idx].serialize())
         self.assertEqual(self.dealer1.watering_hole, dealer2.watering_hole)
         self.assertEqual(self.dealer1.deck, dealer2.deck)
 
@@ -61,6 +73,10 @@ class DealerTestCase(TestCase):
         self.assertEqual(self.species_cooperating_scavenger.food, 2)
         self.assertEqual(self.species_hungry_forrager.food, 3)
         self.assertEqual(self.dealer1.watering_hole, 5)
+
+    def test_feed_one_v2(self):
+        self.dealer3.feed_one(self.dealer3.players)
+        self.assertEqual(self.species_attacker_scavenger.food, 5)
 
     def test_fat_feed(self):
         fat_species = Species(food=1, population=BIG_SIZE, body=BIG_SIZE, traits=[Trait.FAT_TISSUE])
@@ -94,7 +110,11 @@ class DealerTestCase(TestCase):
             out_file.write("\n")
 
     def generate_xfeed_cases(self):
-        test_cases = [(self.dealer1, 5)]
+        """
+
+        :return:
+        """
+        test_cases = [(self.dealer1, self.dealer1.feed_one())]
         for case_number, (situation, expected) in enumerate(test_cases):
             self.generate_json_case(case_number + 1, situation, expected)
 
