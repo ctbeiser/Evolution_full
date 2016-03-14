@@ -10,9 +10,9 @@ class TraitSerialization:
     def serialize(self):
         return self.name.lower().replace("_", "-")
 
-#    @classmethod
-#    def deserialize(cls, data):
-#        return cls(data)
+    @classmethod
+    def deserialize(cls, data):
+        return cls(data)
 
 traits = ["carnivore", "ambush", "burrowing", "climbing", "cooperation",
           "fat-tissue", "fertile", "foraging", "hard-shell", "herding",

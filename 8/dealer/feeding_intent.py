@@ -1,4 +1,4 @@
-from trait import Trait
+from .trait import Trait
 
 """
     Contains all feeding intents that can be returned by a Player as a

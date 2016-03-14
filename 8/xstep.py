@@ -7,4 +7,9 @@ data = sys.stdin.read()
 configuration = json.loads(data)
 # The Configuration is [LOP+, Natural, LOC].
 
-print(Dealer.deserialize(configuration).feed_one().serialize())
+print(configuration)
+
+dealer = Dealer.deserialize(configuration)
+dealer.feed_one(dealer.players)
+
+print(dealer.serialize())

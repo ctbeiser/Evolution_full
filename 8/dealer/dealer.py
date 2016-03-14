@@ -1,6 +1,6 @@
-from trait import Trait
-from player import Player
-from traitcard import TraitCard
+from .trait import Trait
+from .player import Player
+from .traitcard import TraitCard
 
 class Dealer:
     def __init__(self, players, watering_hole, deck):
