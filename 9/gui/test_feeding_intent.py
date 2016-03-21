@@ -1,9 +1,9 @@
 from unittest import TestCase
 from unittest.mock import Mock
-from .player import Player
-from .species import Species
-from .trait import Trait
-from .feeding_intent import FeedCarnivore, FeedVegetarian, StoreFat, CannotFeed, FeedNone
+from player import Player
+from species import Species
+from trait import Trait
+from feeding_intent import FeedCarnivore, FeedVegetarian, StoreFat, CannotFeed, FeedNone
 
 BIG_SIZE = 4
 LITTLE_SIZE = 2

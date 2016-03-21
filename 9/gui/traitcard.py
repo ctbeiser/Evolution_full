@@ -1,4 +1,4 @@
-from .trait import Trait
+from trait import Trait
 
 # Because range is inclusive only on the bottom
 FOOD_VALUE_RANGE = range(-8, 8+1)
@@ -15,6 +15,10 @@ class TraitCard:
         else:
             raise ValueError("Food value for a trait card must be in the acceptable range")
         self.trait = trait
+
+    def make_tree(self, tree, parent):
+        tree.insert(parent, 'end', text=(str(self.food_value) + ", " + self.trait.serialize()))
+
 
     def serialize(self):
         """ Returns a serialized version of the Card

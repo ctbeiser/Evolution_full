@@ -1,9 +1,9 @@
 from unittest import TestCase, mock
-from .dealer import Dealer
-from .player import Player
-from .species import Species
-from .trait import Trait
-from .traitcard import TraitCard
+from dealer import Dealer
+from player import Player
+from species import Species
+from trait import Trait
+from traitcard import TraitCard
 import os
 import json
 

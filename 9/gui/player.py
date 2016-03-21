@@ -1,10 +1,10 @@
 """ Represents a Player for the Evolution game
 """
 
-from .trait import Trait
-from .species import Species
-from .feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, CannotFeed
-from .traitcard import TraitCard
+from trait import Trait
+from species import Species
+from feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, CannotFeed
+from traitcard import TraitCard
 
 DEFAULT_BAG_VALUE = 0
 
@@ -16,11 +16,18 @@ class Player:
         :param player_id: id of the player as a Natural number greater than 0
         :param species: a list of Species or None
         :param bag: number of food tokens in the bag
+        :param cards: a list of TraitCards that form the player's hand
         """
         self.player_id = player_id
         self.species = species or []
         self.bag = bag
         self.cards = cards or []
+
+    def make_tree(self, tree, parent):
+        p = tree.insert(parent, 'end', text=("Player " + str(self.player_id)))
+        tree.insert(p, 'end', text=("Bag:", str(self.bag)))
+        for species in self.species:
+            species.make_tree(tree, p)
 
     def serialize(self):
         """ Returns a serialized version of the Player

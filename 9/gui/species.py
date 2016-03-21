@@ -3,7 +3,7 @@
 Represents a Species in the Evolution game.
 
 """
-from .trait import Trait, HARD_SHELL_THRESHOLD
+from trait import Trait, HARD_SHELL_THRESHOLD
 
 
 SPECIES_DEFAULT_FOOD = 0
@@ -32,6 +32,17 @@ class Species:
         self.population = population
         self.traits = traits or []
         self.fat_food = fat_food or SPECIES_DEFAULT_FAT_FOOD
+
+    def make_tree(self, tree, parent):
+        s = tree.insert(parent, 'end', text=("Species (hungry)" if self.is_hungry() else "Species (full)"))
+        tree.insert(s, "end", text="Food: " + str(self.food))
+        tree.insert(s, "end", text="Body: " + str(self.body))
+        tree.insert(s, "end", text="Population: " + str(self.population))
+        if self.fat_food:
+            tree.insert(s, "end", text="Fat Food: " + str(self.fat_food))
+        for t in self.traits:
+            t.make_tree(tree, s)
+
 
     @classmethod
     def deserialize(cls, data):

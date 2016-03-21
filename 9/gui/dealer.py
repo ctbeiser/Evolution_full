@@ -1,6 +1,6 @@
-from .trait import Trait
-from .player import Player
-from .traitcard import TraitCard
+from trait import Trait
+from player import Player
+from traitcard import TraitCard
 
 DEAD_CREATURE_REPLACEMENT_CARDS = 2
 
@@ -15,6 +15,15 @@ class Dealer:
         self.players = players
         self.watering_hole = watering_hole
         self.deck = deck or []
+
+    def make_tree(self, tree, parent):
+        tree.insert(parent, 'end', text=("Watering Hole", str(self.watering_hole)))
+        players = tree.insert(parent, 'end', text="Players")
+        for p in self.players:
+            p.make_tree(tree, players)
+        deck = tree.insert(parent, "end", text="Deck: " + str(len(self.deck)) + " cards")
+        for c in self.deck:
+            c.make_tree(tree, deck)
 
     def serialize(self):
         """ Produce a serialized representation of a Dealer according to the specification
