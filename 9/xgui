@@ -1,1 +1,2 @@
-python gui/gui.py 
+#! /bin/sh
+python3 gui/gui.py

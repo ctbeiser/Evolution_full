@@ -4,6 +4,7 @@ from traitcard import TraitCard
 
 DEAD_CREATURE_REPLACEMENT_CARDS = 2
 
+
 class Dealer:
     def __init__(self, players, watering_hole, deck=None):
         """ Initialize a new Dealer
@@ -17,6 +18,10 @@ class Dealer:
         self.deck = deck or []
 
     def make_tree(self, tree, parent):
+        """ Modify the ttk tree provided to add a representation of this data structure
+        :param tree: a ttk Treeview widget object
+        :param parent: the ttk reference to a row in the ttk Treeview under which this content should be added.
+        """
         tree.insert(parent, 'end', text=("Watering Hole: " + str(self.watering_hole)))
         players = tree.insert(parent, 'end', text="Players")
         for p in self.players:

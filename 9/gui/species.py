@@ -34,6 +34,10 @@ class Species:
         self.fat_food = fat_food or SPECIES_DEFAULT_FAT_FOOD
 
     def make_tree(self, tree, parent):
+        """ Modify the ttk tree provided to add a representation of this data structure
+        :param tree: a ttk Treeview widget object
+        :param parent: the ttk reference to a row in the ttk Treeview under which this content should be added.
+        """
         s = tree.insert(parent, 'end', text=("Species (hungry)" if self.is_hungry() else "Species (full)"))
         tree.insert(s, "end", text="Food: " + str(self.food))
         tree.insert(s, "end", text="Body: " + str(self.body))
