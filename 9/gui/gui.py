@@ -8,21 +8,19 @@ class Gui(Frame):
         Frame.__init__(self, master)
         self.tree = ttk.Treeview(master)
 
-    def process_data(self, json, parent=""):
-        for k, v in json:
-            if hasattr(v, __iter__):
-                ident = self.tree.insert(parent, "end", text=k)
-                self.process_data(v, parent=ident)
-
-
 
 if __name__ == "__main__":
     data = sys.stdin.read()
     configuration = json.loads(data)
     dealer = Dealer.deserialize(configuration)
-    root = Tk()
-    window = Gui(root)
-    dealer.make_tree(window.tree, parent="")
 
-    window.tree.pack()
+    dealer_root = Tk()
+    player_root = Tk()
+    dealer_window = Gui(dealer_root)
+    player_window = Gui(player_root)
+    dealer.make_tree(dealer_window.tree, parent="")
+    dealer.players[0].make_tree(player_window.tree, parent="")
+
+    dealer_window.tree.pack()
+    player_window.tree.pack()
     mainloop()

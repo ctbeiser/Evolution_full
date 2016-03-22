@@ -28,6 +28,10 @@ class Player:
         tree.insert(p, 'end', text=("Bag:", str(self.bag)))
         for species in self.species:
             species.make_tree(tree, p)
+            
+        h = tree.insert(p, 'end', text="Hand: ")
+        for card in self.cards:
+            card.make_tree(tree, h)
 
     def serialize(self):
         """ Returns a serialized version of the Player

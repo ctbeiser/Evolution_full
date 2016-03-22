@@ -17,7 +17,7 @@ class Dealer:
         self.deck = deck or []
 
     def make_tree(self, tree, parent):
-        tree.insert(parent, 'end', text=("Watering Hole", str(self.watering_hole)))
+        tree.insert(parent, 'end', text=("Watering Hole: " + str(self.watering_hole)))
         players = tree.insert(parent, 'end', text="Players")
         for p in self.players:
             p.make_tree(tree, players)
