@@ -1,46 +1,37 @@
-Purpose: Implement Dealer class and a method "feed_one" to handle feedings
+Purpose: Implement a GUI for seeing player state and 
 
-dealer/dealer.py
+gui/dealer.py
 	Contains a representation of the Dealer in the game
-dealer/traitcard.py
+gui/traitcard.py
 	Contains a representation of Trait Cards in the game
-dealer/feeding_intent.py
+gui/trait.py
+	Represents the Traits in the game.
+gui/feeding_intent.py
 	Contains all possible feeding intents returnable by Player
-dealer/player.py
+gui/gui.py
+	Contains a script that displays a GUI
+gui/player.py
 	Contains a representation of Player in the game
-dealer/species.py
+gui/species.py
 	Contains a representation of Species boards in the game
 Tests:
-dealer/test_feeding_intent.py
+gui/test_feeding_intent.py
 	Tests for feeding_intent.py
-dealer/test_player.py
+gui/test_player.py
 	Tests for player.py
-dealer/test_species.py
+gui/test_species.py
 	Tests for species.py
-feeding/trait.py
-dealer/test_dealer.py
+gui/test_dealer.py
 	Tests for dealer.py
 
-
 test/*
-	JSON Test files for project test harness. Input files are denoted as X-in.json, output files as X-out.json
-
-rest.txt
-	A wishlist of methods desired to complete the Player class
-
-xstep.py
-	A test harness for testing 'feed_one' method in Dealer. Accepts input from stdin and outputs to stdout
-
-xstep
-	A bash script that calls xstep.py
+	JSON sample inputs for test harness. Input files are denoted as X-in.json
+xgui
+	A bash script that calls gui.py
 compile
 	Exits with code 0
 
-Code can be read by beginning with xstep.py which creates a Dealer object from data from stdin and calls the feed_one method. Continue reading into the dealer.py, specifically the feed_one method. Then read feeding_intent.py, specifically the implementation of the enact methods. 
+Code for the GUI should be read starting with gui.py.
 
-The tests can be run with the following command:
-    python3 -m unittest
-
- The xstep tests can be run from the assignment root with:
-    for i in {1..5}; do ./xstep < test/$i-in.json | cmp test/$i-out.json; done
-
+The xgui sample inputs can be run from the assignment root with:
+    for i in {1..5}; do ./xgui < test/$i-in.json
