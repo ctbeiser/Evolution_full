@@ -247,7 +247,7 @@ class PlayerTestCase(TestCase):
             result = player.next_species_to_feed(enemies, self.DEFAULT_WATERING_HOLE)
 
             self.assertIsInstance(result, FeedCarnivore)
-            self.assertIs(result.player_index, expected.player_index)
+            self.assertIs(result.defending_player_index, expected.defending_player_index)
             self.assertIs(result.defender_index, expected.defender_index)
             self.assertIs(result.species_index, expected.species_index)
 

@@ -64,7 +64,6 @@ class Dealer:
         :param scavenge: Boolean indicating whether creatures with scavenger should be fed.
         """
         species = player.species[species_index]
-
         if not (species.is_hungry() and self.watering_hole):
             return None
 
