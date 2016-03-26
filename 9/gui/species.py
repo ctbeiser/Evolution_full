@@ -5,7 +5,6 @@ Represents a Species in the Evolution game.
 """
 from trait import Trait, HARD_SHELL_THRESHOLD
 
-
 SPECIES_DEFAULT_FOOD = 0
 SPECIES_DEFAULT_BODY = 0
 SPECIES_DEFAULT_POPULATION = 1
@@ -46,7 +45,6 @@ class Species:
             tree.insert(s, "end", text="Fat Food: " + str(self.fat_food))
         for t in self.traits:
             t.make_tree(tree, s)
-
 
     @classmethod
     def deserialize(cls, data):

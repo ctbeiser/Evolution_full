@@ -6,6 +6,9 @@ DEAD_CREATURE_REPLACEMENT_CARDS = 2
 
 
 class Dealer:
+    """
+    Represents a Dealer in the game of Evolution.
+    """
     def __init__(self, players, watering_hole, deck=None):
         """ Initialize a new Dealer
         :param players: A list of Player
@@ -76,6 +79,7 @@ class Dealer:
             species.food += 1
             self.watering_hole -= 1
 
+        for feeding in range(feed_amount):
             if species.has_trait(Trait.COOPERATION):
                 right = player.get_neighbors(species)[1]
                 if right:

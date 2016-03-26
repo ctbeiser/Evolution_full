@@ -5,6 +5,8 @@ from dealer import Dealer
 
 
 class Gui(Frame):
+    """Represents a Window for the GUI.
+    """
     def __init__(self, master):
         Frame.__init__(self, master)
         self.tree = ttk.Treeview(master)

@@ -52,8 +52,8 @@ class Player:
 
     @classmethod
     def deserialize(cls, data):
-        """ Returns a serialized version of the Player
-        :return: serialized version of the Player
+        """ Given a serialized representation of the Player according to the evolution spec, produces a Player
+        :return: a Player
         """
         parameters = {parameter: value for parameter, value in data}
 
@@ -77,9 +77,9 @@ class Player:
     @staticmethod
     def _find_max_values(values, key):
         """ Returns a list of maximum values given a key.
-        :param values: list of values
-        :param key: value -> sortable value
-        :return: list all elements tied for first place
+        :param values: list of Python values
+        :param key: a function of type (Value -> sortable Value)
+        :return: a List containing all elements tied for first place according to the given key.
         """
         max_key = max(key(v) for v in values)
         return [v for v in values if key(v) == max_key]
@@ -92,8 +92,8 @@ class Player:
            the (plain) population attribute, followed by the food that
            the species has been fed so far, and finally the (plain) body size.
 
-        :param species: species to generate a sorting key for
-        :return: sorting key for the given species
+        :param species: a Species to generate a sorting key for
+        :return: a Python sorting key for the given species
         """
         return -species.population, -species.food, -species.body
 
@@ -117,7 +117,7 @@ class Player:
 
     def get_neighbors(self, species):
         """ Returns the left and right neighbor of the given species.
-        :param species: species to find the neighbors of
+        :param species: Species to find the neighbors of
         :return: a tuple of (left, right) neighbor, where either can be None
         """
         species_length = len(self.species)
@@ -129,8 +129,7 @@ class Player:
         return left, right
 
     def get_attackable_species(self, attacker):
-        """ Returns all species of this player that are attackable by the
-         given species.
+        """ Returns all species owned by this player that are attackable by the given species.
         :param attacker: the attacking species
         :return: list of species attackable by the attacker
         """
@@ -158,8 +157,7 @@ class Player:
                 return self.feed_carnivore(players)
 
     def next_species_to_feed(self, players, watering_hole):
-        """ Determines the next species to feed, given the other players
-        in the game.
+        """ Determines the next species to feed, given the other players in the game.
         :param players: list of Player
         :param watering_hole: number of food tokens in the watering hole
         :return: FeedingIntention
@@ -171,9 +169,8 @@ class Player:
                 CannotFeed())
 
     def feed_fat_tissue(self, watering_hole):
-        """ Returns an intent to store the specified number of food tokens
-         on the largest species with the "fat tissue" trait. If there are
-         no suitable species returns None
+        """ Returns an intent to store the specified number of food tokens on the largest species with the "fat tissue"
+        trait. If there are no suitable species returns None
         :param watering_hole: number of food tokens in the watering hole
         """
         species_with_fat_tissue = [species for species in self.species
@@ -189,9 +186,9 @@ class Player:
             return StoreFat(self.species.index(eater), food_to_request)
 
     def feed_vegetarian(self):
-        """ Returns an intent to feed the largest hungry vegetarian species
-         belonging to this player or None if there are no hungry vegetarians.
-        :return: intent to feed the largest hungry vegetarian or None
+        """ Returns an intent to feed the largest hungry vegetarian species belonging to this player or None if there
+        are no hungry vegetarians.
+        :return: A FeedingIntent to feed the largest hungry vegetarian, or None
         """
         vegetarians = [species for species in self.species
                        if not species.has_trait(Trait.CARNIVORE) and species.is_hungry()]
@@ -209,43 +206,28 @@ class Player:
          If no carnivore can attack any of the other player's species
          returns None.
 
-        :param players: other players in the game
-        :return: intent to attack or None
+        :param players: a List of the other players in the game
+        :return: a FeedingIntent to attack or None
         """
-        carnivores = [species for species in self.species
-                      if species.has_trait(Trait.CARNIVORE) and species.is_hungry()]
+        carnivores = [species for species in self.species if species.has_trait(Trait.CARNIVORE) and species.is_hungry()]
+        eater_candidates = self.order_species(carnivores)
 
-        if len(carnivores) > 0:
-            eater_candidates = self.order_species(carnivores)
-
-            for candidate in eater_candidates:
-                eater = candidate
-                attackable_species = [player.get_attackable_species(candidate) for player in players]
-                # if there are no attackable species move on to the next candidate
-                if not any(attackable_species):
-                    continue
-
+        for candidate in eater_candidates:
+            attackable_species = [player.get_attackable_species(candidate) for player in players]
+            if any(attackable_species):
                 largest_attackable = []
-
                 for player, player_attackable_species in zip(players, attackable_species):
-                    if not player_attackable_species:
-                        continue
+                    if player_attackable_species:
+                        player_largest_attackable = player.order_species(player_attackable_species)[0]
+                        largest_attackable.append((player_largest_attackable, player))
 
-                    player_largest_attackable = player.order_species(player_attackable_species)[0]
-                    largest_attackable.append((player_largest_attackable, player))
+                    def defender_player_key(species_player):
+                        """ Sorts defender_player list based on largest species and then player id"""
+                        species, player = species_player
+                        return self.species_ordering_key(species)
 
-                def defender_player_key(species_player):
-                    """ Sorts defender_player list based on largest species and then player id"""
-                    species, player = species_player
-                    return self.species_ordering_key(species)
-
-                defender, player = sorted(largest_attackable, key=defender_player_key)[0]
-
-                return FeedCarnivore(
-                    self.species.index(eater),
-                    players.index(player),
-                    player.species.index(defender)
-                )
+                    defender, player = sorted(largest_attackable, key=defender_player_key)[0]
+                    return FeedCarnivore(self.species.index(candidate), players.index(player), player.species.index(defender))
 
     def feed_on_own(self):
         """ Checks if the player can feed on one of their species. If so

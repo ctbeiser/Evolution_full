@@ -1,7 +1,7 @@
 import sys
 import json
 
-from dealer.dealer import Dealer
+from dealer import Dealer
 
 data = sys.stdin.read()
 configuration = json.loads(data)

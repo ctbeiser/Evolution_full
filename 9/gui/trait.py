@@ -7,6 +7,10 @@ HARD_SHELL_THRESHOLD = 4
 
 
 class TraitSerialization:
+    """
+    This class is a mixin for Trait Enum, which allows it to serialize, deserialize, and appear in the GUI. This is
+    necessary because Enums with a fixed set of members can't be extended.
+    """
     def make_tree(self, tree, parent):
         """ Modify the ttk tree provided to add a representation of this data structure
         :param tree: a ttk Treeview widget object
@@ -35,4 +39,5 @@ traits = ["carnivore", "ambush", "burrowing", "climbing", "cooperation",
 
 trait_mapping = {trait.upper().replace("-", "_"): trait for trait in traits}
 
+# Our Enum class, created using the functional Enum API, represents a Trait.
 Trait = Enum(type=TraitSerialization, value="Trait", names=trait_mapping)

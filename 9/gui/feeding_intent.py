@@ -9,7 +9,7 @@ from trait import Trait
 
 
 class FeedingIntent:
-    """ Represents a feeding intent, this class should never be used directly. """
+    """ Represents a feeding intent— this class should never be used directly. """
 
     def serialize(self):
         """ Returns the appropriate data representation for the object
