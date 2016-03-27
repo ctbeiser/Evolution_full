@@ -85,13 +85,13 @@ class Dealer:
                 if right:
                     self.feed_creature(player, species_index+1)
 
-            if scavenge:
-                idx = self.players.index(player)
-                for i in range(len(self.players)):
-                    player = self.players[(idx+i)%len(self.players)]
-                    for s in player.species:
-                        if s.has_trait(Trait.SCAVENGER):
-                            self.feed_creature(player, player.species.index(s))
+        if scavenge:
+            idx = self.players.index(player)
+            for i in range(len(self.players)):
+                player = self.players[(idx+i) % len(self.players)]
+                for s in player.species:
+                    if s.has_trait(Trait.SCAVENGER):
+                        self.feed_creature(player, player.species.index(s))
 
     def fat_feed(self, player, species_index, tokens):
         """ Transfer fat food from the watering hole onto a player.

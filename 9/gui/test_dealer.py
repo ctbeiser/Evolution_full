@@ -89,7 +89,7 @@ class DealerTestCase(TestCase):
 
     def test_feed_one_v2(self):
         self.dealer3.feed_one(self.dealer3.players)
-        self.assertEqual(self.species_attacker_scavenger.food, 6)
+        self.assertEqual(self.species_attacker_scavenger.food, 5)
 
     def test_fat_feed(self):
         fat_species = Species(food=1, population=BIG_SIZE, body=BIG_SIZE, traits=[Trait.FAT_TISSUE])

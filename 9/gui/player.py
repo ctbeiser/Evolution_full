@@ -210,8 +210,8 @@ class Player:
         :return: a FeedingIntent to attack or None
         """
         carnivores = [species for species in self.species if species.has_trait(Trait.CARNIVORE) and species.is_hungry()]
-        eater_candidates = self.order_species(carnivores)
 
+        eater_candidates = self.order_species(carnivores)
         for candidate in eater_candidates:
             attackable_species = [player.get_attackable_species(candidate) for player in players]
             if any(attackable_species):
@@ -221,13 +221,13 @@ class Player:
                         player_largest_attackable = player.order_species(player_attackable_species)[0]
                         largest_attackable.append((player_largest_attackable, player))
 
-                        def defender_player_key(species_player):
-                            """ Sorts defender_player list based on largest species and then player id"""
-                            species, player = species_player
-                            return self.species_ordering_key(species)
+                def defender_player_key(species_player):
+                    """ Sorts defender_player list based on largest species and then player id"""
+                    species, player = species_player
+                    return self.species_ordering_key(species)
 
-                        defender, player = sorted(largest_attackable, key=defender_player_key)[0]
-                        return FeedCarnivore(self.species.index(candidate), players.index(player), player.species.index(defender))
+                defender, player = sorted(largest_attackable, key=defender_player_key)[0]
+                return FeedCarnivore(self.species.index(candidate),players.index(player),player.species.index(defender))
 
     def feed_on_own(self):
         """ Checks if the player can feed on one of their species. If so
