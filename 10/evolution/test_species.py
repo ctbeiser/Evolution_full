@@ -1,7 +1,7 @@
 from unittest import TestCase, mock
 
-from species import Species
-from trait import Trait, HARD_SHELL_THRESHOLD
+from .species import Species
+from .trait import Trait, HARD_SHELL_THRESHOLD
 
 
 class SpeciesTestCase(TestCase):

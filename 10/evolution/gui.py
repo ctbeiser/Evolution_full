@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 import json
-from dealer import Dealer
+from .dealer import Dealer
 
 
 class Gui(Frame):

@@ -1,7 +1,7 @@
 import sys
 import json
 
-from evolution import Dealer
+from evolution.dealer import Dealer
 
 data = sys.stdin.read()
 configuration = json.loads(data)

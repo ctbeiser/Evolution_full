@@ -1,11 +1,11 @@
 from unittest import TestCase
 from unittest.mock import Mock
 from unittest.mock import MagicMock
-from player import Player
-from species import Species
-from trait import Trait
-from feeding_intent import FeedCarnivore, FeedVegetarian, StoreFat, CannotFeed, FeedNone
-from dealer import Dealer
+from .player import Player
+from .species import Species
+from .trait import Trait
+from .feeding_intent import FeedCarnivore, FeedVegetarian, StoreFat, CannotFeed, FeedNone
+from .dealer import Dealer
 
 BIG_SIZE = 4
 LITTLE_SIZE = 2

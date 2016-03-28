@@ -1,6 +1,6 @@
-from trait import Trait
-from player import Player
-from traitcard import TraitCard
+from .trait import Trait
+from .player import Player
+from .traitcard import TraitCard
 
 DEAD_CREATURE_REPLACEMENT_CARDS = 2
 
