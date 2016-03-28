@@ -1,0 +1,45 @@
+Purpose: Refactor all code in the project.
+
+evolution/dealer.py
+	Contains a representation of the Dealer in the game
+evolution/traitcard.py
+	Contains a representation of Trait Cards in the game
+evolution/feeding_intent.py
+	Contains all possible feeding intents returnable by Player
+evolution/gui.py
+	Contains a script that produces GUIs from dealers and players.
+evolution/player.py
+	Contains a representation of Player in the game
+evolution/species.py
+	Contains a representation of Species boards in the game
+evolution/trait.py
+	Contains a representation of Traits in the game
+Tests:
+evolution/test_feeding_intent.py
+	Tests for feeding_intent.py
+evolution/test_player.py
+	Tests for player.py
+evolution/test_species.py
+	Tests for species.py
+evolution/test_dealer.py
+	Tests for dealer.py
+
+
+test/*
+	JSON Test files for project test harness. Input files are denoted as X-in.json, output files as X-out.json
+
+xstep.py
+	A test harness for testing 'feed_one' method in Dealer. Accepts input from stdin and outputs to stdout
+
+xstep
+	A bash script that calls xstep.py
+compile
+	Exits with code 0
+
+Code can be read by beginning with xstep.py which creates a Dealer object from data from stdin and calls the feed_one method. Continue reading into the dealer.py, specifically the feed_one method. Then read feeding_intent.py, specifically the implementation of the enact methods.
+
+The tests can be run with the following command:
+    python3 -m unittest
+
+ The xstep tests can be run from the assignment root with:
+    for i in {1..5}; do ./xstep < test/$i-in.json | cmp test/$i-out.json; done
