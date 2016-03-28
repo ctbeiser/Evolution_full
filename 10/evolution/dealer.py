@@ -69,22 +69,15 @@ class Dealer:
         species = player.species[species_index]
         if not (species.is_hungry() and self.watering_hole):
             return None
-
         feed_amount = min(1 + species.has_trait(Trait.FORAGING), self.watering_hole, species.population - species.food)
-
         for feeding in range(feed_amount):
-            if not (species.is_hungry() and self.watering_hole):
-                return None
-
             species.food += 1
             self.watering_hole -= 1
-
         for feeding in range(feed_amount):
             if species.has_trait(Trait.COOPERATION):
                 right = player.get_neighbors(species)[1]
                 if right:
                     self.feed_creature(player, species_index+1)
-
         if scavenge:
             idx = self.players.index(player)
             for i in range(len(self.players)):
