@@ -90,12 +90,9 @@ class FeedCarnivore(FeedSpecies):
         has_horns = defender.has_trait(Trait.HORNS)
 
         defender.population -= 1
-        defender.food = min(defender.food, defender.population)
         attacker.population -= has_horns
-        attacker.food = min(attacker.food, attacker.population)
         if defender.population == 0:
             dealer.kill_creature(others[self.defending_player_index], self.defender_index)
-
         if attacker.population == 0:
             dealer.kill_creature(player, self.species_index)
 

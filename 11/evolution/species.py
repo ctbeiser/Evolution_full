@@ -8,6 +8,7 @@ from .trait import Trait, HARD_SHELL_THRESHOLD
 SPECIES_DEFAULT_FOOD = 0
 SPECIES_DEFAULT_BODY = 0
 SPECIES_DEFAULT_POPULATION = 1
+SPECIES_MAX_POPULATION = 7
 SPECIES_DEFAULT_FAT_FOOD = 0
 
 
@@ -28,9 +29,20 @@ class Species:
         """
         self.food = food
         self.body = body
-        self.population = population
+        self._population = population
         self.traits = traits or []
         self.fat_food = fat_food or SPECIES_DEFAULT_FAT_FOOD
+
+    @property
+    def population(self):
+        return self._population
+
+    @population.setter
+    def population(self, value):
+        value = min(value, SPECIES_MAX_POPULATION)
+        # TODO :  Add killing the creature to here... somehow.
+        self._population = value
+        self.food = min(self.food, self._population)
 
     def make_tree(self, tree, parent):
         """ Modify the ttk tree provided to add a representation of this data structure
