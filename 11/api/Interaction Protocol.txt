@@ -1,0 +1,12 @@
+Component API's and Sequencing notes recorded in interaction diagrams. 
+
+Interactions between the external player and the system will consist of prompts from the main program in the form of GameState objects. 
+
+Data that is sent between the system and the external player will be encoded in JSON format. Not included in the interaction diagrams are the serialize() and deserialize() methods. These methods exist for all data types currently in the system and are called by the Main program before sending data to the external player and upon recieving data from the external player.
+
+Data Descriptions:
+GameState - Internal representation of the current state of the game. Similar to a Configuration object but does not include "bag" nor "card" data for other Players.
+Action4[] - An array of Action4 objects
+Action4 - See Evolution Spec
+FeedingChoice - An object describing the players intent to feed
+Score - A numerical representation of the current score of a player
