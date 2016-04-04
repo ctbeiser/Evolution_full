@@ -39,9 +39,7 @@ class Action4:
 
     def verify(self, player):
         cards = self.card_indices()
-        conditions = [len(cards) == len(set(cards)),
-                      max(cards) <= len(player.cards)]
-        return all(conditions)
+        return (not(any(cards.count(x) > 1 for x in cards))) and (max(cards) <= len(player.cards))
 
     def enact(self, player):
         cards = self.card_indices()
@@ -53,9 +51,10 @@ class Action4:
             player.cards.pop(cards.pop())
 
     def card_indices(self):
-        lists = [[self.food_index],
+        lists = [[[self.food_index]],
                  [p.cards() for p in self.grow_populations],
                  [p.cards() for p in self.grow_bodys],
                  [p.cards() for p in self.boards_with_traits],
                  [p.cards() for p in self.trait_replacements]]
-        return [card for l in lists for card in l]
+        x = [cardlist for l in lists for cardlist in l]
+        return [card for sublist in x for card in sublist]
