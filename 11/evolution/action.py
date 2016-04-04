@@ -21,6 +21,9 @@ class UpAction(Action):
         self.card = card
 
     def cards(self):
+        """
+        :return: All cards that this method will use.
+        """
         return [self.card]
 
     @classmethod
@@ -63,7 +66,9 @@ class NewBoardAction(Action):
         return self.serialize()
 
     def serialize(self):
-        [card for card in self.other_cards].insert(0, self.card_for_board)
+        x = [card for card in self.other_cards]
+        x.insert(0, self.card_for_board)
+        return x
 
     def enact(self, player):
         hand = player.cards

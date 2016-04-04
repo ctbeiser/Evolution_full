@@ -106,3 +106,12 @@ class Dealer:
         for i in range(DEAD_CREATURE_REPLACEMENT_CARDS):
             if self.deck:
                 player.cards.append(self.deck.pop(0))
+
+    def step_four(self, action4s):
+        assert(len(action4s) == len(self.players))
+        action_players = zip(action4s, self.players)
+        for actions, player in action_players:
+            if not actions.verify(player):
+                assert(False)
+            else:
+                actions.enact(player)

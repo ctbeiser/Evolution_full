@@ -75,7 +75,8 @@ class FeedingIntentTestCase(TestCase):
                                              self.hornDefendPlayer.species.index(self.species_horn_veg))
 
         dealer = Dealer([self.attackPlayer, self.defendPlayer, self.hornDefendPlayer], 10,
-                        [TraitCard(-5, Trait("long-neck")), TraitCard(-5, Trait("long-neck"))])
+                        [TraitCard(-5, Trait("long-neck")), TraitCard(-5, Trait("long-neck")),
+                         TraitCard(-5, Trait("long-neck")), TraitCard(-5, Trait("long-neck"))])
         dealer.feed_creature = Mock()
         self.assertIn(self.species_big_car, self.attackPlayer.species)
 

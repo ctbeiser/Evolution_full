@@ -43,6 +43,15 @@ class Action4:
                       max(cards) <= len(player.cards)]
         return all(conditions)
 
+    def enact(self, player):
+        cards = self.card_indices()
+        for x in [self.grow_bodys, self.grow_populations, self.boards_with_traits, self.trait_replacements]:
+            for act in x:
+                act.enact(player)
+        cards.sort()
+        while cards:
+            player.cards.pop(cards.pop())
+
     def card_indices(self):
         lists = [[self.food_index],
                  [p.cards() for p in self.grow_populations],
