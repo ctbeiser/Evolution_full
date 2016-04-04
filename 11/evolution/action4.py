@@ -20,8 +20,6 @@ class Action4:
         self.boards_with_traits = boards_with_traits
         self.trait_replacements = trait_replacements
 
-        # TODO: make sure all are valid, including together.
-
     @classmethod
     def deserialize(cls, json):
         assert(len(json) == NUMBER_OF_FIELDS)
@@ -39,3 +37,16 @@ class Action4:
                 [p.serialize() for p in self.boards_with_traits],
                 [p.serialize() for p in self.trait_replacements]]
 
+    def verify(self, player):
+        cards = self.card_indices()
+        conditions = [len(cards) == len(set(cards)),
+                      max(cards) <= len(player.cards)]
+        return all(conditions)
+
+    def card_indices(self):
+        lists = [[self.food_index],
+                 [p.cards() for p in self.grow_populations],
+                 [p.cards() for p in self.grow_bodys],
+                 [p.cards() for p in self.boards_with_traits],
+                 [p.cards() for p in self.trait_replacements]]
+        return [card for l in lists for card in l]

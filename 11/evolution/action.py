@@ -1,3 +1,6 @@
+from .player import Player
+from .species import Species
+
 
 class Action:
     def cards(self):
@@ -63,5 +66,27 @@ class NewBoardAction(Action):
         [card for card in self.other_cards].insert(0, self.card_for_board)
 
     def enact(self, player):
-        trait_cards = []
-        # TODO : The way this should work is that we should convert card indices to TraitCards proper, at... some point? uhhh....
+        hand = player.cards
+        traits = [hand[c].trait for c in self.other_cards]
+        player.species.append(Species(traits=traits))
+
+
+class TraitReplaceAction(Action):
+    def __init__(self, board, idx_replace, with_card):
+        self.board = board
+        self.idx_replace = idx_replace
+        self.with_card = with_card
+
+    def cards(self):
+        return [self.with_card]
+
+    @classmethod
+    def deserialize(cls, json):
+        return cls(*json)
+
+    def serialize(self):
+        return [self.board, self.idx_replace, self.with_card]
+
+    def enact(self, player):
+        card = player.cards[self.with_card].trait
+        player.species[self.board].replace_trait_at_index(self.idx_replace, card)

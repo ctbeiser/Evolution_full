@@ -31,6 +31,7 @@ class Species:
         self.body = body
         self._population = population
         self.traits = traits or []
+        self.verify_traits()
         self.fat_food = fat_food or SPECIES_DEFAULT_FAT_FOOD
 
     @property
@@ -43,6 +44,15 @@ class Species:
         # TODO :  Add killing the creature to here... somehow.
         self._population = value
         self.food = min(self.food, self._population)
+
+    def replace_trait_at_index(self, idx, trait):
+        self.traits[idx] = trait
+        self.verify_traits()
+
+    def verify_traits(self):
+        if not self.has_trait(Trait.FAT_TISSUE):
+            self.fat_food = 0
+        assert(len(self.traits) == len(set(self.traits)))
 
     def make_tree(self, tree, parent):
         """ Modify the ttk tree provided to add a representation of this data structure
