@@ -108,6 +108,9 @@ class Dealer:
                 player.cards.append(self.deck.pop(0))
 
     def step_four(self, action4s):
+        """ Carry out Step4 of the Evolution Game.
+        :param action4s: a List of Action4s, of length equal to the list of Players in this Dealer.
+        """
         assert(len(action4s) == len(self.players))
         action_players = zip(action4s, self.players)
         for actions, player in action_players:

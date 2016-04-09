@@ -4,6 +4,7 @@ from .action import *
 from .trait import *
 import json
 
+
 class UpActionTestCase(TestCase):
     def setUp(self):
         example_config = """[[[["id",2],

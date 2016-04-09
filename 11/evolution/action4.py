@@ -22,6 +22,10 @@ class Action4:
 
     @classmethod
     def deserialize(cls, json):
+        """
+        :param json: a python Array representing an Action4
+        :return: a new Action4
+        """
         assert(len(json) == NUMBER_OF_FIELDS)
         food_index = json[0]
         pops = [PopulationUpAction.deserialize(p) for p in json[1]]
@@ -31,6 +35,9 @@ class Action4:
         return cls(food_index, pops, bodys, boards, replaces)
 
     def serialize(self):
+        """
+        :return: a python Array representing this Action4
+        """
         return [self.food_index,
                 [p.serialize() for p in self.grow_populations],
                 [p.serialize() for p in self.grow_bodys],
@@ -38,10 +45,17 @@ class Action4:
                 [p.serialize() for p in self.trait_replacements]]
 
     def verify(self, player):
+        """ Ensure that there are no issues with the application of this Action4 to the given Player.
+        :param player: a Player to verify against
+        :return: True if this Action4 can be applied; else, False.
+        """
         cards = self.card_indices()
         return (not(any(cards.count(x) > 1 for x in cards))) and (max(cards) <= len(player.cards))
 
     def enact(self, player):
+        """ Carry out the actions on the given player.
+        :param player: a Player to modify
+        """
         cards = self.card_indices()
         for x in [self.grow_bodys, self.grow_populations, self.boards_with_traits, self.trait_replacements]:
             for act in x:
@@ -51,6 +65,9 @@ class Action4:
             player.cards.pop(cards.pop())
 
     def card_indices(self):
+        """
+        :return: a List of Integers representing the cards used by this Action 4. Repeats indicate an improper Action4.
+        """
         lists = [[[self.food_index]],
                  [p.cards() for p in self.grow_populations],
                  [p.cards() for p in self.grow_bodys],
