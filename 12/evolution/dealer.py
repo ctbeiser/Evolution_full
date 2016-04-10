@@ -10,14 +10,14 @@ class Dealer:
     """
     Represents a Dealer in the game of Evolution.
     """
-    def __init__(self, players, watering_hole, deck=None):
+    def __init__(self, players=None, watering_hole, deck=None):
         """ Initialize a new Dealer
         :param players: A list of Player
         :param watering_hole: Integer
         :param deck: List of Trait_Card
         :return:
         """
-        self.players = players
+        self.players = players or []
         self.watering_hole = watering_hole
         self.deck = deck or []
 
@@ -162,3 +162,11 @@ At the end of a turn, the players reduce the population size of each species to 
         for i in range(DEAD_CREATURE_REPLACEMENT_CARDS):
             if self.deck:
                 player.cards.append(self.deck.pop(0))
+
+    def get_score(self, player_index):
+        out_string = " player id: "
+        out_string += player_index
+        out_string += " score: "
+        for player in self.players:
+            if player.player_id == player_index:
+                return out_string.append(player.get_score())

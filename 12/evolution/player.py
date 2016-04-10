@@ -166,6 +166,13 @@ class Player:
                        species.is_hungry()]
         return {"fat": fat_tissue, "carn": carnivores, "veg": vegetarians}
 
+    def get_score(self):
+        score = self.bag
+        for species in self.species:
+            score += species.population
+            score += len(species.traits)
+        return score
+
 
 class InternalPlayer(Player):
 
