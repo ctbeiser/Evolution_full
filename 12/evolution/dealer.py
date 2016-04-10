@@ -55,7 +55,7 @@ class Dealer:
         for i, player in enumerate(external_players):
             self.players.append(InternalPlayer(i, player))
 
-        while not self.game_over()
+        while not self.game_over():
             self.step_one()
             actions = self.step_two_and_three()
             self.step_four(actions)
