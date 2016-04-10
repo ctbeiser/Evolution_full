@@ -65,7 +65,7 @@ class TraitCard:
             food_range = NORMAL_FOOD_VALUE_RANGE
             if t == Trait.CARNIVORE:
                 food_range = CARNIVORE_FOOD_VALUE_RANGE
-            for i in range(food_range):
+            for i in food_range:
                 deck.append(TraitCard(i, t))
         assert(len(deck) == 122)
         return deck

@@ -10,7 +10,7 @@ class Dealer:
     """
     Represents a Dealer in the game of Evolution.
     """
-    def __init__(self, players=None, watering_hole, deck=None):
+    def __init__(self, players=None, watering_hole=0, deck=None):
         """ Initialize a new Dealer
         :param players: A list of Player
         :param watering_hole: Integer
@@ -18,7 +18,7 @@ class Dealer:
         :return:
         """
         self.players = players or []
-        self.watering_hole = watering_hole
+        self.watering_hole = watering_hole or 0
         self.deck = deck or []
 
     def make_tree(self, tree, parent):
@@ -111,7 +111,7 @@ At the end of a turn, the players reduce the population size of each species to 
         rest_players = [p for p in self.players if p is not first_player]
 
         intent = first_player.automatically_choose_species_to_feed(rest_players) or \
-                 first_player.feed_next(self.watering_hole, rest_players)
+                first_player.feed_next(self.watering_hole, rest_players)
 
         intent.enact(first_player, rest_players, self)
 
@@ -165,8 +165,9 @@ At the end of a turn, the players reduce the population size of each species to 
 
     def get_score(self, player_index):
         out_string = " player id: "
-        out_string += player_index
+        out_string += str(player_index)
         out_string += " score: "
         for player in self.players:
             if player.player_id == player_index:
-                return out_string.append(player.get_score())
+                out_string  + str(player.get_score())
+        return out_string

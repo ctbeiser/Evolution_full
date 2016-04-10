@@ -49,6 +49,7 @@ class Player:
             ["species", [species.serialize() for species in self.species]],
             [BAG_JSON_NAME, self.bag],
         ]
+
         if self.cards:
             serialized.append([CARDS_JSON_NAME, [card.serialize() for card in self.cards]])
         return serialized
@@ -156,14 +157,14 @@ class Player:
         :return: Dictionary<String, Array<Species>>
         """
         fat_tissue = [species for species in self.species
-                      if species.has_trait(Trait.FAT_TISSUE) and
-                      species.fat_food < species.body]
+                    if species.has_trait(Trait.FAT_TISSUE) and
+                    species.fat_food < species.body]
         carnivores = [species for species in self.species
-                      if species.has_trait(Trait.CARNIVORE) and
-                      species.is_hungry()]
+                    if species.has_trait(Trait.CARNIVORE) and
+                    species.is_hungry()]
         vegetarians = [species for species in self.species
-                       if not species.has_trait(Trait.CARNIVORE) and
-                       species.is_hungry()]
+                    if not species.has_trait(Trait.CARNIVORE) and
+                    species.is_hungry()]
         return {"fat": fat_tissue, "carn": carnivores, "veg": vegetarians}
 
     def get_score(self):
@@ -189,7 +190,7 @@ class InternalPlayer(Player):
         :param board: A Species or None
         :param cards: A List of TraitCard
         """
-        self.cards.append(cards)
+        self.cards.extend(cards)
         if board:
             self.species.append(board)
         self.player_agent.rehydrate(self.serialize())
@@ -227,8 +228,8 @@ class InternalPlayer(Player):
         if len(carnivore_targets) == 1 and len(carnivore_targets[0][0]) == 1 and not hungry_veg and not fat:
             attackable_species, player, candidate = carnivore_targets[0]
             return FeedCarnivore(self.species.index(carnivore_targets[0][2]),
-                                 players.index(carnivore_targets[0][1]),
-                                 player.species.index(attackable_species[0]))
+                                players.index(carnivore_targets[0][1]),
+                                player.species.index(attackable_species[0]))
         elif carnivore_targets:
             return None
         elif not fat and not hungry_veg:
@@ -300,7 +301,7 @@ class ExternalPlayer(Player):
         # greatest need for fat food: the body size of the species
         if len(species_with_fat_tissue) > 0:
             species_with_greatest_need = self._find_max_values(species_with_fat_tissue,
-                                                               lambda species: species.body-species.fat_food)
+                                                            lambda species: species.body-species.fat_food)
 
             eater = self.order_species(species_with_greatest_need)[0]
             food_to_request = min(eater.body - eater.fat_food, watering_hole)
