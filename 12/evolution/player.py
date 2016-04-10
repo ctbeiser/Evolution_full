@@ -12,8 +12,8 @@ DEFAULT_BAG_VALUE = 0
 BAG_JSON_NAME = "bag"
 CARDS_JSON_NAME = "cards"
 
-class Player:
 
+class Player:
     def __init__(self, player_id, species=None, bag=DEFAULT_BAG_VALUE, cards=None):
         """ Initialize a new Player
         :param player_id: id of the player as a Natural number greater than 0
@@ -148,6 +148,18 @@ class Player:
 
         return [species for species in self.species if is_attackable(species)]
 
+    def get_fat_or_hungry_species(self):
+        fat_tissue = [species for species in self.species
+                      if species.has_trait(Trait.FAT_TISSUE) and
+                      species.fat_food < species.body]
+        carnivores = [species for species in self.species
+                      if species.has_trait(Trait.CARNIVORE) and
+                      species.is_hungry()]
+        vegetarians = [species for species in self.species
+                       if not species.has_trait(Trait.CARNIVORE) and
+                       species.is_hungry()]
+        return {"fat": fat_tissue, "carn": carnivores, "veg": vegetarians}
+
 
 class InternalPlayer(Player):
 
@@ -161,23 +173,29 @@ class InternalPlayer(Player):
         after = [player.serialize_public_info() for player in players[location+1:]]
         self.player_agent.choose(before, after)
 
-
     def automatically_choose_species_to_feed(self, players):
         """ If there's only one possibility, produce an intent that can be automatically carried out by the dealer.
         :param players: A list of all other players
         :return: An FeedingIntent or None
         """
+        options = self.get_fat_or_hungry_species()
+        fat, hungry_carnivores, hungry_veg = options["fat"], options["carn"], options["veg"]
         # feed_fat_tissue will produce the same results, though different intents, regardless of watering hole depth
-        if self.feed_on_own() or self.feed_fat_tissue(1):
-            return None
-        if len([species for species in self.species if species.is_hungry and
-                not species.has_trait(Trait.CARNIVORE)]) == 1 and not self.feed_carnivore(players):
-            return self.feed_vegetarian()
-        else:
-            hungry_carnivores = [species for species in self.species if species.has_trait(Trait.CARNIVORE) and species.is_hungry]
-            targets = [player.get_attackable_species(candidate) for player in players for candidate in hungry_carnivores]
-            if len(targets) == 1 and len(targets[0]) == 1:
-                return self.feed_carnivore(players)
+
+        carnivore_targets = [(player.get_attackable_species(candidate), player, candidate) for player in players for candidate in hungry_carnivores]
+        if len(carnivore_targets) == 1 and len(carnivore_targets[0][0]) == 1 and not hungry_veg and not fat:
+            attackable_species, player, candidate = carnivore_targets[0]
+            return FeedCarnivore(self.species.index(carnivore_targets[0][2]),
+                                 players.index(carnivore_targets[0][1]),
+                                 player.species.index(attackable_species[0]))
+        elif carnivore_targets:
+            return
+
+        elif len(hungry_veg) == 1 and not fat:
+            return FeedVegetarian(self.species.index(hungry_veg[0]))
+
+        elif fat and len(fat) == 1 and not hungry_veg:
+            StoreFat(fat[0])
 
 
 class ExternalPlayer(Player):
@@ -205,8 +223,6 @@ class ExternalPlayer(Player):
         actions = Action4(foodcard, popup, bodyup, board_actions, replace)
         return actions.serialize()
 
-
-
     def next_species_to_feed(self, players, watering_hole):
         """ Determines the next species to feed, given the other players in the game.
         :param players: list of Player
@@ -224,9 +240,7 @@ class ExternalPlayer(Player):
         trait. If there are no suitable species returns None
         :param watering_hole: number of food tokens in the watering hole
         """
-        species_with_fat_tissue = [species for species in self.species
-                                   if species.has_trait(Trait.FAT_TISSUE) and
-                                   species.fat_food < species.body]
+        species_with_fat_tissue = self.get_fat_or_hungry_species()["fat"]
         # greatest need for fat food: the body size of the species
         if len(species_with_fat_tissue) > 0:
             species_with_greatest_need = self._find_max_values(species_with_fat_tissue,
@@ -241,8 +255,7 @@ class ExternalPlayer(Player):
         are no hungry vegetarians.
         :return: A FeedingIntent to feed the largest hungry vegetarian, or None
         """
-        vegetarians = [species for species in self.species
-                       if not species.has_trait(Trait.CARNIVORE) and species.is_hungry()]
+        vegetarians = self.get_fat_or_hungry_species()["veg"]
 
         if len(vegetarians) > 0:
             eater = self.order_species(vegetarians)[0]
@@ -260,7 +273,7 @@ class ExternalPlayer(Player):
         :param players: a List of the other players in the game
         :return: a FeedingIntent to attack or None
         """
-        carnivores = [species for species in self.species if species.has_trait(Trait.CARNIVORE) and species.is_hungry()]
+        carnivores = self.get_fat_or_hungry_species()["carn"]
 
         eater_candidates = self.order_species(carnivores)
         for candidate in eater_candidates:
