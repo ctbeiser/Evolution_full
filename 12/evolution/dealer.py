@@ -55,7 +55,8 @@ class Dealer:
             self.players.append(InternalPlayer(i, player))
         self.step_one()
         actions = self.step_two_and_three()
-        self.step_four(actions)
+        self.apply_actions(actions)
+        self.feeding()
 
     def step_one(self):
         """
@@ -73,25 +74,36 @@ class Dealer:
         """
         return [p.request_actions(self.players) for p in self.players]
 
-    def step_four(self, action4s):
-        """ Carry out Step4 of the Evolution Game, inlcuding applying actions and
+    def apply_actions(self, action4s):
+        """ Apply Action4s to their players and retrieve t
         :param action4s: a List of Action4s, of length equal to the list of Players in this Dealer.
+        :return: a List of TraitCard to be placed in the watering hole
         """
+        watering_hole_cards = []
         assert(len(action4s) == len(self.players))
         action_players = zip(action4s, self.players)
         for actions, player in action_players:
             if not actions.verify(player):
                 assert(False)
             else:
-                actions.enact(player)
+                food_card = actions.enact(player)
+                watering_hole_cards.append(food_card.food_value)
+        self.watering_hole = max(0, self.watering_hole + sum(watering_hole_cards))
 
-        self.feeding()
 
     def feeding(self):
-        # The dealer turns over the food cards placed at the watering hole. <- Oops, where do we put those cards???
-        # Doing so adds or subtracts food tokens as specified on the trait cards to the pool of tokens available on the watering hole board;
-        # the food supply does not go below 0.
-        # It also activates the auto-feeding trait cards that players have associated with their species; the food is taken from the watering hole.
+        #autofeeding: increase pops of fertile species, then feeds long-necked
+        for player in self.players:
+            for species in player.species:
+                species.population += species.has_trait(Trait.FERTILE)
+        for player in self.players:
+            for species in player.species:
+                if species.has_trait(Trait.LONG_NECK):
+                    self.feed_creature(player, player.species.index(species))
+
+        # Round-robin feeding <- add starting player
+
+
         """Beginning with the current starting player, the players feed their species one animal at a time in a round-robin fashion:
 A vegetarian species is fed one token from the watering hole supply.
 
