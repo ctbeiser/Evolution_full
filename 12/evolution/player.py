@@ -241,6 +241,10 @@ class InternalPlayer(Player):
         elif fat and len(fat) == 1 and not hungry_veg:
             StoreFat(fat[0])
 
+    def move_tokens_to_bag(self):
+        for s in self.species:
+            self.bag += s.food
+            s.food = 0
 
 class ExternalPlayer(Player):
 
