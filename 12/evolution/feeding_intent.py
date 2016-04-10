@@ -17,6 +17,23 @@ class FeedingIntent:
         """
         raise NotImplementedError()
 
+    @staticmethod
+    def deserialize(data):
+        """ Given a feeding intent as JSON, return the proper FeedingIntent
+        :param data: a JSON representation of a FeedingIntent
+        :return: a new FeedingIntent
+        """
+        if data == False:
+            return FeedNone()
+        elif len(data) == 1:
+            return FeedSpecies(*data)
+        elif len(data) == 2:
+            return FeedVegetarian(*data)
+        elif len(data) == 3:
+            return FeedCarnivore(*data)
+        else:
+            assert(False, "This is not a valid FeedingIntent")
+
     def enact(self, player, others, dealer):
         """ Modifies players to carry out this feeding
         :param player: Player that is feeding
@@ -49,6 +66,9 @@ class FeedSpecies(FeedingIntent):
 
     def serialize(self):
         return self.species_index
+
+    def deserialize(self, data):
+        self.init(*data)
 
 
 class StoreFat(FeedSpecies):

@@ -3,7 +3,7 @@
 
 from .trait import Trait
 from .species import Species
-from .feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, CannotFeed
+from .feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, CannotFeed, FeedingIntent
 from .traitcard import TraitCard
 from .action4 import Action4
 from .action import *
@@ -140,7 +140,7 @@ class Player:
     def get_attackable_species(self, attacker):
         """ Returns all species owned by this player that are attackable by the given species.
         :param attacker: the attacking species
-        :return: list of species attackable by the attacker
+        :return: list of Species attackable by the attacker
         """
         def is_attackable(species):
             left, right = self.get_neighbors(species)
@@ -149,6 +149,10 @@ class Player:
         return [species for species in self.species if is_attackable(species)]
 
     def get_fat_or_hungry_species(self):
+        """ Returns a dictionary of string->Array, where each array contains all species which, given the correct board
+        state, could produce a feeding action
+        :return: Dictionary<String, Array<Species>>
+        """
         fat_tissue = [species for species in self.species
                       if species.has_trait(Trait.FAT_TISSUE) and
                       species.fat_food < species.body]
@@ -164,19 +168,37 @@ class Player:
 class InternalPlayer(Player):
 
     def __init__(self, player_id, external_player):
+        """
+        :param player_id: Integer representing the ID for this player
+        :param external_player: an ExternalPlayer to act as an agent for this player.
+        """
         self.player_agent = external_player
         super().__init__(player_id)
 
     def request_actions(self, players):
+        """ Request an Action4 for this turn from the ExternalPlayer
+        :param players: A list of all player objects in this game.
+        :return: a new Action4
+        """
         location = players.index(self)
         before = [player.serialize_public_info() for player in players[:location]]
         after = [player.serialize_public_info() for player in players[location+1:]]
-        self.player_agent.choose(before, after)
+        return Action4.deserialize(self.player_agent.choose(before, after))
+
+    def feed_next(self, watering_hole, players):
+        """
+        :param watering_hole: an Integer representing the food tokens in the Watering Hole
+        :param players: other Players in the game
+        :return: a FeedingIntention
+        """
+        other_players_as_json = [p.serialize_public_info() for p in players]
+        result = self.player_agent.feed_species(watering_hole, self.serialize(), other_players_as_json)
+        return FeedingIntent.deserialize(result)
 
     def automatically_choose_species_to_feed(self, players):
         """ If there's only one possibility, produce an intent that can be automatically carried out by the dealer.
         :param players: A list of all other players
-        :return: An FeedingIntent or None
+        :return: An FeedingIntent or None, where None represents the situation where there are multiple options.
         """
         options = self.get_fat_or_hungry_species()
         fat, hungry_carnivores, hungry_veg = options["fat"], options["carn"], options["veg"]
@@ -189,7 +211,9 @@ class InternalPlayer(Player):
                                  players.index(carnivore_targets[0][1]),
                                  player.species.index(attackable_species[0]))
         elif carnivore_targets:
-            return
+            return None
+        elif not fat and not hungry_veg:
+            return CannotFeed()
 
         elif len(hungry_veg) == 1 and not fat:
             return FeedVegetarian(self.species.index(hungry_veg[0]))
@@ -204,7 +228,7 @@ class ExternalPlayer(Player):
         """ Implement the Silly Strategy for choosing cards
         :param before: players before this one in the list, as a List of JSON Players containing only public info
         :param after: players after this one in the list, as a List of JSON Players containing only public info
-        :return: Serialized Action4 representing choices made
+        :return: Action4 as JSON, representing choices made
         """
         cards = [card for card in self.cards]
         cards.sort()
@@ -222,6 +246,17 @@ class ExternalPlayer(Player):
 
         actions = Action4(foodcard, popup, bodyup, board_actions, replace)
         return actions.serialize()
+
+    def feed_species(self, watering_hole, newself, players):
+        """
+        :param watering_hole: an Integer representing the state of the Watering Hole
+        :param newself: a Json representation of the updated state of this player.
+        :param players: A list of all other players, as JSON, without specific data
+        :return: A JSON representation of the changed species
+        """
+        self.rehydrate(newself)
+        players = [Player.deserialize(player_json) for player_json in players]
+        return self.next_species_to_feed(players, watering_hole).serialize()
 
     def next_species_to_feed(self, players, watering_hole):
         """ Determines the next species to feed, given the other players in the game.
