@@ -42,6 +42,11 @@ class FeedingIntent:
         """
         pass
 
+    def should_end_feeding(self):
+        """
+        :return: a Boolean indicating whether feeding should be ended for this Player
+        """
+        return False
 
 class CannotFeed(FeedingIntent):
     """ Represents the inability to feed any species. """
@@ -49,12 +54,18 @@ class CannotFeed(FeedingIntent):
     def serialize(self):
         raise ValueError("Cannot feed cannot be serialized.")
 
+    def should_end_feeding(self):
+        return True
+
 
 class FeedNone(FeedingIntent):
     """ Represents the intention to not feed any species. """
 
     def serialize(self):
         return False
+
+    def should_end_feeding(self):
+        return True
 
 
 class FeedSpecies(FeedingIntent):
