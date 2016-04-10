@@ -1,1 +1,2 @@
-python xsilly.py
+#!/bin/sh
+python3 xsilly.py
