@@ -163,11 +163,10 @@ At the end of a turn, the players reduce the population size of each species to 
             if self.deck:
                 player.cards.append(self.deck.pop(0))
 
-    def get_score(self, player_index):
-        out_string = " player id: "
-        out_string += str(player_index)
-        out_string += " score: "
+    def get_scores(self):
+        results = []
         for player in self.players:
-            if player.player_id == player_index:
-                out_string  + str(player.get_score())
-        return out_string
+            player_score = player.get_score(), player.player_id
+            results.append(player_score)
+        results.sort()
+        return results
