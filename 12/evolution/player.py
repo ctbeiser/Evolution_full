@@ -5,9 +5,12 @@ from .trait import Trait
 from .species import Species
 from .feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, CannotFeed
 from .traitcard import TraitCard
+from .action4 import Action4
+from .action import *
 
 DEFAULT_BAG_VALUE = 0
-
+BAG_JSON_NAME = "bag"
+CARDS_JSON_NAME = "cards"
 
 class Player:
 
@@ -32,7 +35,7 @@ class Player:
         tree.insert(p, 'end', text=("Bag:", str(self.bag)))
         for species in self.species:
             species.make_tree(tree, p)
-            
+
         h = tree.insert(p, 'end', text="Hand: " + ((str(len(self.cards)) + " cards") if self.cards else "empty"))
         for card in self.cards:
             card.make_tree(tree, h)
@@ -44,35 +47,41 @@ class Player:
         serialized = [
             ["id", self.player_id],
             ["species", [species.serialize() for species in self.species]],
-            ["bag", self.bag],
+            [BAG_JSON_NAME, self.bag],
         ]
         if self.cards:
-            serialized.append(["cards", [card.serialize() for card in self.cards]])
+            serialized.append([CARDS_JSON_NAME, [card.serialize() for card in self.cards]])
         return serialized
+
+    def serialize_public_info(self):
+        data = self.serialize()
+        return [i for i in data if i[0] != BAG_JSON_NAME and i[0] != CARDS_JSON_NAME]
+
+    @staticmethod
+    def get_params_from_json(data):
+        parameters = {parameter: value for parameter, value in data}
+
+        assert 'id' in parameters
+        assert 'species' in parameters
+        assert BAG_JSON_NAME in parameters
+
+        species = [Species.deserialize(species) for species in parameters['species']]
+
+        cards = []
+        if CARDS_JSON_NAME in parameters:
+            cards = [TraitCard.deserialize(card) for card in parameters[CARDS_JSON_NAME]]
+
+        return parameters['id'], species, parameters[BAG_JSON_NAME], cards
+
+    def rehydrate(self, data):
+        self.player_id, self.species, self.bag, self.cards = Player.get_params_from_json(data)
 
     @classmethod
     def deserialize(cls, data):
         """ Given a serialized representation of the Player according to the evolution spec, produces a Player
         :return: a Player
         """
-        parameters = {parameter: value for parameter, value in data}
-
-        assert 'id' in parameters
-        assert 'species' in parameters
-        assert 'bag' in parameters
-
-        species = [Species.deserialize(species) for species in parameters['species']]
-
-        cards = []
-        if 'cards' in parameters:
-            cards = [TraitCard.deserialize(card) for card in parameters['cards']]
-
-        return cls(
-            player_id=parameters['id'],
-            species=species,
-            bag=parameters['bag'],
-            cards=cards
-        )
+        return cls(*list(Player.get_params_from_json(data)))
 
     @staticmethod
     def _find_max_values(values, key):
@@ -139,6 +148,20 @@ class Player:
 
         return [species for species in self.species if is_attackable(species)]
 
+
+class InternalPlayer(Player):
+
+    def __init__(self, player_id, external_player):
+        self.player_agent = external_player
+        super().__init__(player_id)
+
+    def request_actions(self, players):
+        location = players.index(self)
+        before = [player.serialize_public_info() for player in players[:location]]
+        after = [player.serialize_public_info() for player in players[location+1:]]
+        self.player_agent.choose(before, after)
+
+
     def automatically_choose_species_to_feed(self, players):
         """ If there's only one possibility, produce an intent that can be automatically carried out by the dealer.
         :param players: A list of all other players
@@ -155,6 +178,34 @@ class Player:
             targets = [player.get_attackable_species(candidate) for player in players for candidate in hungry_carnivores]
             if len(targets) == 1 and len(targets[0]) == 1:
                 return self.feed_carnivore(players)
+
+
+class ExternalPlayer(Player):
+
+    def choose(self, before, after):
+        """ Implement the Silly Strategy for choosing cards
+        :param before: players before this one in the list, as a List of JSON Players containing only public info
+        :param after: players after this one in the list, as a List of JSON Players containing only public info
+        :return: Serialized Action4 representing choices made
+        """
+        cards = [card for card in self.cards]
+        cards.sort()
+
+        foodcard = self.cards.index(cards.pop(0))
+        board_actions, popup, bodyup, replace = [], [], [], []
+        if len(cards) >= 2:
+            board_actions = [NewBoardAction(self.cards.index(cards.pop(0)), [self.cards.index(cards.pop(0))])]
+        if cards:
+            popup = [PopulationUpAction(len(self.species), self.cards.index(cards.pop(0)))]
+        if cards:
+            bodyup = [BodyUpAction(len(self.species), self.cards.index(cards.pop(0)))]
+        if cards:
+            replace = [TraitReplaceAction(len(self.species), 0, self.cards.index(cards.pop(0)))]
+
+        actions = Action4(foodcard, popup, bodyup, board_actions, replace)
+        return actions.serialize()
+
+
 
     def next_species_to_feed(self, players, watering_hole):
         """ Determines the next species to feed, given the other players in the game.

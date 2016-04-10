@@ -2,10 +2,12 @@
 
 """
 from enum import Enum
+from functools import total_ordering
 
 HARD_SHELL_THRESHOLD = 4
 
 
+@total_ordering
 class TraitSerialization:
     """
     This class is a mixin for Trait Enum, which allows it to serialize, deserialize, and appear in the GUI. This is
@@ -31,6 +33,12 @@ class TraitSerialization:
         :return: Trait
         """
         return cls(data)
+
+    def __lt__(self, other):
+        return self.serialize() < other.serialize()
+
+    def __eq__(self, other):
+        return self.serialize() == other.serialize()
 
 traits = ["carnivore", "ambush", "burrowing", "climbing", "cooperation",
           "fat-tissue", "fertile", "foraging", "hard-shell", "herding",

@@ -1,9 +1,11 @@
 from .trait import Trait
+from functools import total_ordering
 
 # Because range is inclusive only on the bottom
 FOOD_VALUE_RANGE = range(-8, 8+1)
 
 
+@total_ordering
 class TraitCard:
     def __init__(self, food_value, trait):
         """ Represents a Card with a Trait and a quantity of Food
@@ -16,13 +18,24 @@ class TraitCard:
             raise ValueError("Food value for a trait card must be in the acceptable range")
         self.trait = trait
 
+    def __lt__(self, other):
+        if self.trait < other.trait:
+            return True
+        elif self.trait == other.trait:
+            return self.food_value < other.food_value
+        else:
+            return False
+
+    def __eq__(self, other):
+        return self.trait == other.trait and self.food_value == other.food_value
+
+
     def make_tree(self, tree, parent):
         """ Modify the ttk tree provided to add a representation of this data structure
         :param tree: a ttk Treeview widget object
         :param parent: the ttk reference to a row in the ttk Treeview under which this content should be added.
         """
         tree.insert(parent, 'end', text=(str(self.food_value) + ", " + self.trait.serialize()))
-
 
     def serialize(self):
         """ Returns a serialized version of the Card
@@ -39,3 +52,4 @@ class TraitCard:
         """
         food_value, name = data
         return cls(food_value, Trait(name))
+
