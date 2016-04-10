@@ -52,7 +52,7 @@ class Species:
     def verify_traits(self):
         if not self.has_trait(Trait.FAT_TISSUE):
             self.fat_food = 0
-        assert(len(self.traits) == len(set(self.traits)))
+        assert(not(any(self.traits.count(x) > 1 for x in self.traits)))
 
     def make_tree(self, tree, parent):
         """ Modify the ttk tree provided to add a representation of this data structure

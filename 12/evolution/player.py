@@ -230,19 +230,22 @@ class ExternalPlayer(Player):
         :param after: players after this one in the list, as a List of JSON Players containing only public info
         :return: Action4 as JSON, representing choices made
         """
-        cards = [card for card in self.cards]
-        cards.sort()
+        sorted_cards = [card for card in self.cards]
+        sorted_cards.sort()
 
-        foodcard = self.cards.index(cards.pop(0))
+
+        foodcard = self.cards.index(sorted_cards.pop(0))
+
         board_actions, popup, bodyup, replace = [], [], [], []
-        if len(cards) >= 2:
-            board_actions = [NewBoardAction(self.cards.index(cards.pop(0)), [self.cards.index(cards.pop(0))])]
-        if cards:
-            popup = [PopulationUpAction(len(self.species), self.cards.index(cards.pop(0)))]
-        if cards:
-            bodyup = [BodyUpAction(len(self.species), self.cards.index(cards.pop(0)))]
-        if cards:
-            replace = [TraitReplaceAction(len(self.species), 0, self.cards.index(cards.pop(0)))]
+        if len(sorted_cards) >= 2:
+            board_actions = [NewBoardAction(self.cards.index(sorted_cards.pop(0)), [self.cards.index(sorted_cards.pop(0))])]
+
+        if sorted_cards:
+            popup = [PopulationUpAction(len(self.species), self.cards.index(sorted_cards.pop(0)))]
+        if sorted_cards:
+            bodyup = [BodyUpAction(len(self.species), self.cards.index(sorted_cards.pop(0)))]
+        if sorted_cards:
+            replace = [TraitReplaceAction(len(self.species), 0, self.cards.index(sorted_cards.pop(0)))]
 
         actions = Action4(foodcard, popup, bodyup, board_actions, replace)
         return actions.serialize()

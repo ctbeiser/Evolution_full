@@ -1,4 +1,3 @@
-from .player import Player
 from .species import Species
 
 
