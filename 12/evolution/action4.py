@@ -53,16 +53,19 @@ class Action4:
         return (not(any(cards.count(x) > 1 for x in cards))) and (max(cards) <= len(player.cards))
 
     def enact(self, player):
-        """ Carry out the actions on the given player.
+        """ Carry out the actions on the given player and remove the TraitCard matching the food_index
         :param player: a Player to modify
+        :return: The card placed in the Watering Hole
         """
         cards = self.card_indices()
+        food_card = player.cards[self.food_index]
         for x in [self.grow_bodys, self.grow_populations, self.boards_with_traits, self.trait_replacements]:
             for act in x:
                 act.enact(player)
         cards.sort()
         while cards:
-            player.cards.pop(cards.pop())
+            player.cards.remove(cards.pop())
+        return food_card
 
     def card_indices(self):
         """
