@@ -2,7 +2,8 @@ from .trait import Trait
 from functools import total_ordering
 
 # Because range is inclusive only on the bottom
-FOOD_VALUE_RANGE = range(-8, 8+1)
+CARNIVORE_FOOD_VALUE_RANGE = range(-8, 8+1)
+NORMAL_FOOD_VALUE_RANGE = range(-3, 3+1)
 
 
 @total_ordering
@@ -12,7 +13,8 @@ class TraitCard:
         :param food_value: An Integer between -8 and 8
         :param trait: A Trait
         """
-        if food_value in FOOD_VALUE_RANGE:
+        if food_value in NORMAL_FOOD_VALUE_RANGE or \
+                ((food_value in CARNIVORE_FOOD_VALUE_RANGE) and trait == Trait.CARNIVORE):
             self.food_value = food_value
         else:
             raise ValueError("Food value for a trait card must be in the acceptable range")
@@ -53,3 +55,17 @@ class TraitCard:
         food_value, name = data
         return cls(food_value, Trait(name))
 
+    @staticmethod
+    def new_deck():
+        """ Generate a new unshuffled Deck according to the rules of Evolution
+        :return: a List of TraitCard
+        """
+        deck = []
+        for t in Trait:
+            food_range = NORMAL_FOOD_VALUE_RANGE
+            if t == Trait.CARNIVORE:
+                food_range = CARNIVORE_FOOD_VALUE_RANGE
+            for i in range(food_range):
+                deck.append(TraitCard(i, t))
+        assert(len(deck) == 122)
+        return deck

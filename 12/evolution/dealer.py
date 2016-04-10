@@ -1,9 +1,10 @@
 from .trait import Trait
-from .player import Player
+from .player import Player, InternalPlayer
 from .traitcard import TraitCard
+from .species import Species
 
 DEAD_CREATURE_REPLACEMENT_CARDS = 2
-
+CARD_DRAW_COUNT = 3
 
 class Dealer:
     """
@@ -46,6 +47,62 @@ class Dealer:
         cards = [TraitCard.deserialize(i) for i in data[2]]
         return cls(players, wh, cards)
 
+    def play_game(self, external_players):
+        if not self.deck:
+            self.deck = TraitCard.new_deck()
+            self.deck.sort()
+        for i, player in enumerate(external_players):
+            self.players.append(InternalPlayer(i, player))
+        self.step_one()
+        actions = self.step_two_and_three()
+        self.step_four(actions)
+
+    def step_one(self):
+        """
+        Carries out Step 1 of the Evolution game
+        """
+        for player in self.players:
+            species_count = len(player.species)
+            board = Species() if not species_count else None
+            cards = [self.deck.pop() for _ in range(CARD_DRAW_COUNT + species_count)]
+            player.add_cards(board, cards)
+
+    def step_two_and_three(self):
+        """ Carries out steps 2 and 3 of the evolution game, and returns the actions.
+        :return: an List of Action4
+        """
+        return [p.request_actions(self.players) for p in self.players]
+
+    def step_four(self, action4s):
+        """ Carry out Step4 of the Evolution Game, inlcuding applying actions and
+        :param action4s: a List of Action4s, of length equal to the list of Players in this Dealer.
+        """
+        assert(len(action4s) == len(self.players))
+        action_players = zip(action4s, self.players)
+        for actions, player in action_players:
+            if not actions.verify(player):
+                assert(False)
+            else:
+                actions.enact(player)
+
+        self.feeding()
+
+    def feeding(self):
+        # The dealer turns over the food cards placed at the watering hole. <- Oops, where do we put those cards???
+        # Doing so adds or subtracts food tokens as specified on the trait cards to the pool of tokens available on the watering hole board;
+        # the food supply does not go below 0.
+        # It also activates the auto-feeding trait cards that players have associated with their species; the food is taken from the watering hole.
+        """Beginning with the current starting player, the players feed their species one animal at a time in a round-robin fashion:
+A vegetarian species is fed one token from the watering hole supply.
+
+A Carnvivore species must is directed to successfully attack some other species, including a species of the same player, or die. The attack adds a food token to the Carnivores’ species board and reduces the population size of the attacked species by one. The player may direct the attack against a different species for each feeding round.
+
+The acquired food tokens are temporarily stored with the species board. A food token cannot be added if it takes the total beyond the population count. Either of these actions may trigger additional "induced" feedings, depending on the traits associated with currently existing species, including those of others, currently passive players.
+The feeding procedure continues until every species board has consumed as many food tokens as there are members of the population, or there is no more food on the watering hole board. All left-over food tokens remain on the watering hole board.
+
+At the end of a turn, the players reduce the population size of each species to the number of food tokens associated with its species board. If a species’ population goes to zero, it becomes extinct. The cards associated with an extinct species are discarded and the player receives two trait cards in return. Finally, the players move all food tokens from all their species boards to their food bags.
+"""
+
     def feed_one(self, players_feeding):
         """ Perform one round of feeding
         :param players_feeding: List of Players, with first to feed at the front
@@ -53,9 +110,8 @@ class Dealer:
         first_player = players_feeding[0]
         rest_players = [p for p in self.players if p is not first_player]
 
-                 # Insert the line below when asking players for their choice of species is enabled.
-                 # first_player.automatically_choose_species_to_feed(rest_players) or \
-        intent = first_player.next_species_to_feed(rest_players, self.watering_hole)
+        intent = first_player.automatically_choose_species_to_feed(rest_players) or \
+                 first_player.feed_next(self.watering_hole, rest_players)
 
         intent.enact(first_player, rest_players, self)
 
@@ -106,15 +162,3 @@ class Dealer:
         for i in range(DEAD_CREATURE_REPLACEMENT_CARDS):
             if self.deck:
                 player.cards.append(self.deck.pop(0))
-
-    def step_four(self, action4s):
-        """ Carry out Step4 of the Evolution Game.
-        :param action4s: a List of Action4s, of length equal to the list of Players in this Dealer.
-        """
-        assert(len(action4s) == len(self.players))
-        action_players = zip(action4s, self.players)
-        for actions, player in action_players:
-            if not actions.verify(player):
-                assert(False)
-            else:
-                actions.enact(player)

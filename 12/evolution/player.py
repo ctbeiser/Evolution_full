@@ -63,15 +63,17 @@ class Player:
 
         assert 'id' in parameters
         assert 'species' in parameters
-        assert BAG_JSON_NAME in parameters
 
         species = [Species.deserialize(species) for species in parameters['species']]
 
         cards = []
         if CARDS_JSON_NAME in parameters:
             cards = [TraitCard.deserialize(card) for card in parameters[CARDS_JSON_NAME]]
+        bag = None
+        if BAG_JSON_NAME in parameters:
+            bag = parameters[BAG_JSON_NAME]
 
-        return parameters['id'], species, parameters[BAG_JSON_NAME], cards
+        return parameters['id'], species, bag, cards
 
     def rehydrate(self, data):
         self.player_id, self.species, self.bag, self.cards = Player.get_params_from_json(data)
@@ -175,6 +177,16 @@ class InternalPlayer(Player):
         self.player_agent = external_player
         super().__init__(player_id)
 
+    def add_cards(self, board, cards):
+        """ Add cards and optionally a Species to this player, update the state of the external player.
+        :param board: A Species or None
+        :param cards: A List of TraitCard
+        """
+        self.cards.append(cards)
+        if board:
+            self.species.append(board)
+        self.player_agent.rehydrate(self.serialize())
+
     def request_actions(self, players):
         """ Request an Action4 for this turn from the ExternalPlayer
         :param players: A list of all player objects in this game.
@@ -232,7 +244,6 @@ class ExternalPlayer(Player):
         """
         sorted_cards = [card for card in self.cards]
         sorted_cards.sort()
-
 
         foodcard = self.cards.index(sorted_cards.pop(0))
 
