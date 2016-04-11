@@ -238,3 +238,9 @@ class Player:
         """
         can_attack_own = self.feed_carnivore([self])
         return FeedNone() if can_attack_own else None
+
+
+    def move_tokens_to_bag(self):
+        for s in self.species:
+            self.bag += s.food
+            s.food = 0

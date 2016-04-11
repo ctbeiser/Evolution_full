@@ -19,6 +19,7 @@ class Dealer:
         self.players = players
         self.watering_hole = watering_hole
         self.deck = deck or []
+        self.starting_player = 0
 
     def make_tree(self, tree, parent):
         """ Modify the ttk tree provided to add a representation of this data structure
@@ -41,23 +42,31 @@ class Dealer:
 
     @classmethod
     def deserialize(cls, data):
+        """ From a serialized representation of a Dealer, produces a new Dealer
+        :param data: JSON Dealer
+        :return: new Dealer
+        """
         players = [Player.deserialize(p) for p in data[0]]
         wh = data[1]
         cards = [TraitCard.deserialize(i) for i in data[2]]
         return cls(players, wh, cards)
 
     def feed_one(self, players_feeding):
-        """ Perform one round of feeding
+        """ Perform one round of feeding, and mutates the given Players appropriately, including removing
         :param players_feeding: List of Players, with first to feed at the front
         """
         first_player = players_feeding[0]
         rest_players = [p for p in self.players if p is not first_player]
 
-                 # Insert the line below when asking players for their choice of species is enabled.
-                 # first_player.automatically_choose_species_to_feed(rest_players) or \
-        intent = first_player.next_species_to_feed(rest_players, self.watering_hole)
+        intent = first_player.automatically_choose_species_to_feed(rest_players) or \
+                 first_player.next_species_to_feed(rest_players, self.watering_hole)
 
         intent.enact(first_player, rest_players, self)
+
+        if intent.should_end_feeding():
+            players_feeding.pop(0)
+        else:
+            players_feeding.append(players_feeding.pop(0))
 
     def feed_creature(self, player, species_index, scavenge=False):
         """ Feed the creature from the watering hole if possible.
@@ -107,14 +116,60 @@ class Dealer:
             if self.deck:
                 player.cards.append(self.deck.pop(0))
 
-    def step_four(self, action4s):
-        """ Carry out Step4 of the Evolution Game.
-        :param action4s: a List of Action4s, of length equal to the list of Players in this Dealer.
+    def step_four(self, actions):
+        """ Carries out Step4 of the feeding process
+        :param actions: An Action4 to carry out
         """
-        assert(len(action4s) == len(self.players))
+        self.apply_actions(actions)
+        self.autofeed()
+        self.feeding()
+
+    def apply_actions(self, action4s):
+        """ Apply Action4s to their players and update the watering hole
+        :param action4s: a List of Action4s, of length equal to the list of Players in this Dealer.
+        :return: a List of TraitCard to be placed in the watering hole
+        """
+        watering_hole_cards = []
+        assert (len(action4s) == len(self.players))
         action_players = zip(action4s, self.players)
         for actions, player in action_players:
             if not actions.verify(player):
                 assert(False)
             else:
-                actions.enact(player)
+                food_card = actions.enact(player)
+                watering_hole_cards.append(food_card.food_value)
+        self.watering_hole = max(0, self.watering_hole + sum(watering_hole_cards))
+
+    def autofeed(self):
+        """ Carries out adding population for Fertile, feeding for long_neck, and transferring fat tissue
+        """
+        for player in self.players:
+            for species in player.species:
+                species.population += species.has_trait(Trait.FERTILE)
+        for player in self.players:
+            for species in player.species:
+                if species.has_trait(Trait.LONG_NECK):
+                    self.feed_creature(player, player.species.index(species))
+        for player in self.players:
+            for species in player.species:
+                if species.has_trait(Trait.FAT_TISSUE) and species.population > species.food and species.fat_food:
+                    difference = min(species.fat_food, species.population-species.food)
+                    species.fat_food -= difference
+                    species.food += difference
+
+    def get_ordered_players(self):
+        """ Produces a list of all the players, starting with the current player for the round
+        :return: List<Player>
+        """
+        current_player = self.starting_player
+        players = [p for p in self.players]
+        ordered_players = players[-current_player:] + players[:-current_player]
+        return ordered_players
+
+    def feeding(self):
+        """ Carry out a round of feeding.
+        """
+        ordered_players = self.get_ordered_players()
+        while (ordered_players and self.watering_hole):
+            self.feed_one(ordered_players)
+        self.starting_player = (self.starting_player + 1) % len(self.players)
