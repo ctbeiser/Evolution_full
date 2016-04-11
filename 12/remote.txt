@@ -127,11 +127,3 @@ fd ~ A JSON value representing a feeding choice. One of the following:
      [Nat, Nat]
      [Nat, Nat, Nat]
 
-
-
-
-
-
-
-    -- plus 3 additional trait cards
-
