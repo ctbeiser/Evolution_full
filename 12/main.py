@@ -4,12 +4,12 @@ import json
 from evolution.dealer import Dealer
 from evolution.player import *
 
-players_arg = sys.argv[1]
+players_arg = int(sys.argv[1])
 external_players = []
 
 if not 3 <= players_arg <= 8:
-	sys.exit()
-for x in range(1, int(players_arg) + 1):
+    sys.exit()
+for x in range(1, players_arg + 1):
     external_players.append(ExternalPlayer(x))
 
 dealer = Dealer()
