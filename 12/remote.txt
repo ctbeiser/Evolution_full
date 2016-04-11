@@ -1,0 +1,137 @@
+
+Start Up 
+
+    +----------+
+    |  main    |
+    +----+-----+
+         |
+         |
+    +----+           register               +------------+
+    |    | <--------------------------------+  player 1  |
+    |    | nu += new(n)                     +------+-----+
+    |    |                                         |
+(A) |    |           register                      |        +------------+
+    |    | <------------------------------------------------+  player 2  |
+    |    | nu += new(n)                            |        +-------+----+
+    |    |                                         |                |
+    +---->                                         |                |
+         |                                         |                |
+
+         (A) main will wait 30 seconds after a minimum of 3 players register
+             or begin immediately when 8 players are registered
+
+	 register ~ A JSON array of ["register", n]
+	 n ~ an int representing the players id
+
+
+
+Step 1
+
+              +------+      +------+     +----------+  +----------+
+              | in 1 |      | in 2 |     | player 1 |  | player 2 |
+              +------+      +------+     +----------+  +----------+
+                   |             |             |             |
+                   |             |             |             |
+                   | start(t)    |             |             |
+                   +------------------->       |             |
+                   |             |             |             |
+                   |             |  start(t)   |             |
+                   |             |-------------------------> |
+
+t ~ a JSON array of ["start", k, p]
+k ~ A system generated random number for identifying the player uniquely
+
+p ~ A JSON array containing the current state of self to which the internal player added:
+    -- 1 species board [pop. = 1] w/o traits (if required)
+    || 1 trait card/existing species board
+
+
+
+
+
+Steps 2 and 3
+
++------+   +------+  +----------+  +----------+
+| in 1 |   | in 2 |  | player 1 |  | player 2 |
++----+-+   +---+--+  +------+---+  +------+---+
+     |         |            |             |
+     |         |            |             |
+     |         c            |             |
+     +---------+----------> |             |
+     |         |            |             |
+     +         |         c                |
+     |         +------------+-----------> |
+     |         |            |             |
+     |         |            |         r   |
+     |<===================================|
+     |         |            |             |
+     |         |       r    |             | 
+     |<=====================|             |
+     |         |            |             |
+
+
+c ~ a JSON array containing ["choose", b, a]
+b ~ A JSON array of the state of all players that precede this one for the turn
+    turn minus their cards and food in bag
+a ~ A JSON array of the state of all players that come after this one for the
+    turn minus their cards and food in bag
+
+r ~ a JSON array of ["plays", k, Action4]
+k ~ A system generated random number for identifying the player uniquely
+
+
+Step 4
+
+  +------+   +------+   +----------+  +----------+
+  | in 1 |   | in 2 |   | player 1 |  | player 2 |
+  +----+-+   +--+---+   +-------+--+  +-------+--+
+       |        |               |             |
+       |        |               |             |
+       |        |               |             |
+       |        |               |             |
+       |        |               |             |
+       |        |               |             |
+       |        |               |             |
+       |        |               |             |
+       |        |               |             | 
+       |        |           ys  |             |
+       |        +---------------------------->+
+       |        |               |             |
+       |        |               |  fc         |
+       +<=====================================|
+       |        |               |             |
+       |        |               |             |
+       |          ys            |             |
+       +--------+-------------> |             |
+       |        |               |             |
+       |        |    fc         |             |
+       +<=======================|             |
+       |        |               |             |
+      ...      ...             ...           ...
+       |        |               |             |
+       |        |               |             |
+       |        |               |             |
+
+
+ys ~ A JSON array of ["feed", wh, ps, xs]
+xs ~ A JSON array of all other players in attackable order 
+     [all players starting from current, in turn order]
+wh ~ An int representing the current watering hole value
+ps ~ A JSON array of the current players state 
+
+fc ~ A JSON array of ["feeding", k, fd]
+k ~ A system generated random number for identifying the player uniquely
+fd ~ A JSON value representing a feeding choice. One of the following:
+     false
+     Nat
+     [Nat, Nat]
+     [Nat, Nat, Nat]
+
+
+
+
+
+
+
+    -- plus 3 additional trait cards
+
