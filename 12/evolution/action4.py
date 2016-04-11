@@ -59,7 +59,7 @@ class Action4:
         """
         cards = self.card_indices()
         food_card = player.cards[self.food_index]
-        for x in [self.grow_bodys, self.grow_populations, self.boards_with_traits, self.trait_replacements]:
+        for x in [self.boards_with_traits, self.grow_bodys, self.grow_populations, self.trait_replacements]:
             for act in x:
                 act.enact(player)
         cards.sort()

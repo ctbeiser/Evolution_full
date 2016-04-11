@@ -18,7 +18,7 @@ class Dealer:
         :return:
         """
         self.players = players or []
-        self.watering_hole = watering_hole or 0
+        self.watering_hole = watering_hole
         self.deck = deck or []
         self.starting_player = 0
 
@@ -43,6 +43,10 @@ class Dealer:
 
     @classmethod
     def deserialize(cls, data):
+        """ From a serialized representation of a Dealer, produces a new Dealer
+        :param data: JSON Dealer
+        :return: new Dealer
+        """
         players = [Player.deserialize(p) for p in data[0]]
         wh = data[1]
         cards = [TraitCard.deserialize(i) for i in data[2]]
@@ -80,12 +84,15 @@ class Dealer:
         return [p.request_actions(self.players) for p in self.players]
 
     def step_four(self, actions):
+        """ Carries out Step4 of the feeding process
+        :param actions: An Action4 to carry out
+        """
         self.apply_actions(actions)
         self.autofeed()
         self.feeding()
 
     def apply_actions(self, action4s):
-        """ Apply Action4s to their players and retrieve t
+        """ Apply Action4s to their players and update the watering hole
         :param action4s: a List of Action4s, of length equal to the list of Players in this Dealer.
         :return: a List of TraitCard to be placed in the watering hole
         """
@@ -101,6 +108,8 @@ class Dealer:
         self.watering_hole = max(0, self.watering_hole + sum(watering_hole_cards))
 
     def autofeed(self):
+        """ Carries out adding population for Fertile, feeding for long_neck, and transferring fat tissue
+        """
         for player in self.players:
             for species in player.species:
                 species.population += species.has_trait(Trait.FERTILE)
@@ -109,7 +118,16 @@ class Dealer:
                 if species.has_trait(Trait.LONG_NECK):
                     self.feed_creature(player, player.species.index(species))
 
+        for player in self.players:
+            for species in player.species:
+                if species.has_trait(Trait.FAT_TISSUE) and species.population > species.food and species.fat_food:
+                    difference = min(species.fat_food, species.population - species.food)
+                    species.fat_food -= difference
+                    species.food += difference
+
     def feeding(self):
+        """ Carry out a round of feeding.
+        """
         current_player = self.starting_player
         players = [p for p in self.players]
         ordered_players = players[-current_player:] + players[:-current_player]

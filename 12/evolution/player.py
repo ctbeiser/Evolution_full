@@ -361,3 +361,4 @@ class ExternalPlayer(Player):
         """
         can_attack_own = self.feed_carnivore([self])
         return FeedNone() if can_attack_own else None
+
