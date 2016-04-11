@@ -64,7 +64,7 @@ class Action4:
                 act.enact(player)
         cards.sort()
         while cards:
-            player.cards.remove(cards.pop())
+            player.cards.pop(cards.pop())
         return food_card
 
     def card_indices(self):

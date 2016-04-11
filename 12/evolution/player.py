@@ -264,11 +264,11 @@ class ExternalPlayer(Player):
             board_actions = [NewBoardAction(self.cards.index(sorted_cards.pop(0)), [self.cards.index(sorted_cards.pop(0))])]
 
         if sorted_cards:
-            popup = [PopulationUpAction(len(self.species), self.cards.index(sorted_cards.pop(0)))]
+            popup = [PopulationUpAction(len(self.species)-1, self.cards.index(sorted_cards.pop(0)))]
         if sorted_cards:
-            bodyup = [BodyUpAction(len(self.species), self.cards.index(sorted_cards.pop(0)))]
+            bodyup = [BodyUpAction(len(self.species)-1, self.cards.index(sorted_cards.pop(0)))]
         if sorted_cards:
-            replace = [TraitReplaceAction(len(self.species), 0, self.cards.index(sorted_cards.pop(0)))]
+            replace = [TraitReplaceAction(len(self.species)-1, 0, self.cards.index(sorted_cards.pop(0)))]
 
         actions = Action4(foodcard, popup, bodyup, board_actions, replace)
         return actions.serialize()
@@ -293,8 +293,7 @@ class ExternalPlayer(Player):
         return (self.feed_fat_tissue(watering_hole) or
                 self.feed_vegetarian() or
                 self.feed_carnivore(players) or
-                self.feed_on_own() or
-                CannotFeed())
+                self.feed_on_own())
 
     def feed_fat_tissue(self, watering_hole):
         """ Returns an intent to store the specified number of food tokens on the largest species with the "fat tissue"

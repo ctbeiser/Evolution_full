@@ -23,16 +23,16 @@ class FeedingIntent:
         :param data: a JSON representation of a FeedingIntent
         :return: a new FeedingIntent
         """
-        if data == False:
+        if data is False:
             return FeedNone()
-        elif len(data) == 1:
-            return FeedSpecies(*data)
+        elif isinstance(data, int):
+            return FeedVegetarian(data)
         elif len(data) == 2:
-            return FeedVegetarian(*data)
+            return StoreFat(*data)
         elif len(data) == 3:
             return FeedCarnivore(*data)
         else:
-            assert(False, "This is not a valid FeedingIntent")
+            assert(False)
 
     def enact(self, player, others, dealer):
         """ Modifies players to carry out this feeding
@@ -47,6 +47,7 @@ class FeedingIntent:
         :return: a Boolean indicating whether feeding should be ended for this Player
         """
         return False
+
 
 class CannotFeed(FeedingIntent):
     """ Represents the inability to feed any species. """

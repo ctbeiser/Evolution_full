@@ -112,15 +112,15 @@ class Dealer:
     def feeding(self):
         current_player = self.starting_player
         players = [p for p in self.players]
-        ordered_players =  players[-current_player:] + players[:-current_player]
+        ordered_players = players[-current_player:] + players[:-current_player]
 
-        while (ordered_players or self.watering_hole):
+        while (ordered_players and self.watering_hole):
             self.feed_one(ordered_players)
 
         self.starting_player = (self.starting_player + 1) % len(self.players)
 
         for player in self.players:
-            self.move_tokens_to_bag()
+            player.move_tokens_to_bag()
 
     def feed_one(self, players_feeding):
         """ Perform one round of feeding, and mutates the given Players appropriately, including removing

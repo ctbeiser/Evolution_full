@@ -5,7 +5,7 @@ from unittest import TestCase
 
 from .species import Species
 from .trait import Trait
-from .player import Player
+from .player import Player, ExternalPlayer, InternalPlayer
 from .feeding_intent import FeedNone, FeedVegetarian, StoreFat, FeedCarnivore, CannotFeed
 from .traitcard import TraitCard
 
@@ -138,22 +138,22 @@ class PlayerTestCase(TestCase):
     def test_next_species_to_feed_none(self):
 
         # player would have to attack their own species
-        player = Player(1, species=[self.species_car_0, self.species_fed_veg])
+        player = ExternalPlayer(1, species=[self.species_car_0, self.species_fed_veg])
         self.assertIsInstance(player.next_species_to_feed([], self.DEFAULT_WATERING_HOLE), FeedNone)
 
-    def test_next_species_to_feed_cannot_feed(self):
-
+    def test_cannot_auto_feed(self):
         # no species to feed
-        player = Player(1)
-        self.assertIsInstance(player.next_species_to_feed([], self.DEFAULT_WATERING_HOLE), CannotFeed)
+        player = InternalPlayer(1, None)
+        self.assertIsInstance(player.automatically_choose_species_to_feed([]), CannotFeed)
 
         # all species fully fed
-        player = Player(1, species=[self.species_fed_veg, self.species_fed_car])
-        self.assertIsInstance(player.next_species_to_feed([], self.DEFAULT_WATERING_HOLE), CannotFeed)
+        player = InternalPlayer(1, None)
+        player.species=[self.species_fed_veg, self.species_fed_car]
+        self.assertIsInstance(player.automatically_choose_species_to_feed([]), CannotFeed)
 
     def test_next_species_to_feed_vegetarian(self):
 
-        player = Player(1)
+        player = ExternalPlayer(1)
 
         # no species to feed
         player.species = []
@@ -183,7 +183,7 @@ class PlayerTestCase(TestCase):
 
     def test_next_species_to_feed_fat_tissue(self):
 
-        player = Player(1)
+        player = ExternalPlayer(1)
 
         # no species to feed
         player.species = []
@@ -223,12 +223,12 @@ class PlayerTestCase(TestCase):
         self.assertGreater(self.species_fat_1.body - self.species_fat_1.fat_food, food_available)
 
     def test_next_species_to_feed_carnivore(self):
-        player = Player(1, species=[self.species_car_3, self.species_car_4, self.species_fed_car, self.species_fed_veg])
-        enemy1 = Player(2, species=[self.species_veg_1, self.species_veg_0])
-        enemy2 = Player(3, species=[self.species_veg_0, self.species_car_1])
+        player = ExternalPlayer(1, species=[self.species_car_3, self.species_car_4, self.species_fed_car, self.species_fed_veg])
+        enemy1 = ExternalPlayer(2, species=[self.species_veg_1, self.species_veg_0])
+        enemy2 = ExternalPlayer(3, species=[self.species_veg_0, self.species_car_1])
         # species_veg_3 is defended by its neighbor
-        enemy3 = Player(4, species=[self.species_veg_3, self.species_defends])
-        enemy4 = Player(5, species=[self.species_car_1])
+        enemy3 = ExternalPlayer(4, species=[self.species_veg_3, self.species_defends])
+        enemy4 = ExternalPlayer(5, species=[self.species_car_1])
 
         test_cases = [
             ([enemy1], self.species_car_3, enemy1, self.species_veg_1),
