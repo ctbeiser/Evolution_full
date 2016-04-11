@@ -14,7 +14,7 @@ class UpActionTestCase(TestCase):
                ["traits",["fat-tissue"]],
                ["fat-food" ,4]]]],
   ["bag",42],
-  ["cards",[[3, "climbing"], [4, "long-neck"]]]],
+  ["cards",[[3, "climbing"], [3, "long-neck"]]]],
  [["id",3],
   ["species",[[["food",1],
                ["body",4],
