@@ -222,7 +222,6 @@ class InternalPlayer(Player):
         """
         options = self.get_fat_or_hungry_species()
         fat, hungry_carnivores, hungry_veg = options["fat"], options["carn"], options["veg"]
-        # feed_fat_tissue will produce the same results, though different intents, regardless of watering hole depth
 
         carnivore_targets = [(player.get_attackable_species(candidate), player, candidate) for player in players for candidate in hungry_carnivores]
         if len(carnivore_targets) == 1 and len(carnivore_targets[0][0]) == 1 and not hungry_veg and not fat:
