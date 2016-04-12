@@ -50,6 +50,10 @@ class Dealer:
         return cls(players, wh, cards)
 
     def play_game(self, external_players):
+        """
+        :param external_players: a list of ExternalPlayer objects
+        :return:
+        """
         if not self.deck:
             self.deck = TraitCard.new_deck()
             self.deck.sort()
@@ -118,7 +122,6 @@ class Dealer:
             for species in player.species:
                 if species.has_trait(Trait.LONG_NECK):
                     self.feed_creature(player, player.species.index(species))
-
         for player in self.players:
             for species in player.species:
                 if species.has_trait(Trait.FAT_TISSUE) and species.population > species.food and species.fat_food:
@@ -207,12 +210,12 @@ class Dealer:
                 player.cards.append(self.deck.pop(0))
 
     def get_scores(self):
-        """
-        :return: a List(Score, player_id)
+        """ Get all the scores for this game, in sorted order.
+        :return: a List(Integer, Integer), representing score and player ID respectively.
         """
         results = []
         for player in self.players:
             player_score = player.get_score(), player.player_id
             results.append(player_score)
-        results.sort()
+        results.sort(reverse=True)
         return results
