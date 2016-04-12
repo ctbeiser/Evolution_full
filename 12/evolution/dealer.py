@@ -43,10 +43,7 @@ class Dealer:
 
     @classmethod
     def deserialize(cls, data):
-        """ From a serialized representation of a Dealer, produces a new Dealer
-        :param data: JSON Dealer
-        :return: new Dealer
-        """
+
         players = [Player.deserialize(p) for p in data[0]]
         wh = data[1]
         cards = [TraitCard.deserialize(i) for i in data[2]]
@@ -105,7 +102,8 @@ class Dealer:
             else:
                 food_card = actions.enact(player)
                 watering_hole_cards.append(food_card.food_value)
-        self.watering_hole = max(0, self.watering_hole + sum(watering_hole_cards))
+        for card in watering_hole_cards:
+            self.watering_hole = max(0, self.watering_hole + card)
 
     def autofeed(self):
         """ Carries out adding population for Fertile, feeding for long_neck, and transferring fat tissue
