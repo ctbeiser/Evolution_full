@@ -142,7 +142,7 @@ class Dealer:
         #This is necessary to make sure we don't move current player index when we eject players
         if len(ordered_players) == len(players):
             self.starting_player = (self.starting_player + 1)
-        self.starting_player = self.starting_player % self.players
+        self.starting_player = self.starting_player % len(self.players)
 
         for player in self.players:
             player.move_tokens_to_bag()
