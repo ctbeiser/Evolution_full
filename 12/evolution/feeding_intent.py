@@ -102,7 +102,6 @@ class FeedVegetarian(FeedSpecies):
     """ Represents the intention to feed the vegetarian species at the given
      index in the Player's species list """
     def enact(self, player, others, dealer):
-        print("Feeding")
         dealer.feed_creature(player, self.species_index)
 
 
