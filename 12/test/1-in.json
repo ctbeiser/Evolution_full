@@ -1,6 +1,6 @@
 [
 	[
-		["id", 3],
+		["id", 1],
 		["species", [
 			[
 				["food", 1],
@@ -18,7 +18,7 @@
 		]]
 	],
 	[[
-		["id", 3],
+		["id", 2],
 		["species", [
 			[
 				["food", 1],
@@ -29,10 +29,10 @@
 		]],
 		["bag", 2],
 		["cards", [
-			[-3, "burrowing"],
-			[-3, "carnivore"],
-			[-3, "ambush"],
-			[-3, "climbing"]
+			[-2, "burrowing"],
+			[-2, "carnivore"],
+			[-2, "ambush"],
+			[-2, "climbing"]
 		]]
 	]],
 	[[
@@ -47,10 +47,10 @@
 		]],
 		["bag", 2],
 		["cards", [
-			[-3, "burrowing"],
-			[-3, "carnivore"],
-			[-3, "ambush"],
-			[-3, "climbing"]
+			[-1, "burrowing"],
+			[-1, "carnivore"],
+			[-1, "ambush"],
+			[-1, "climbing"]
 		]]
 	]]
 ]

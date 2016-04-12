@@ -15,10 +15,10 @@
 			[-3, "carnivore"],
 			[-3, "ambush"],
 			[-3, "climbing"],
-			[-3, "burrowing"],
-			[-3, "carnivore"],
-			[-3, "ambush"],
-			[-3, "climbing"]
+			[-1, "burrowing"],
+			[-4, "carnivore"],
+			[-1, "ambush"],
+			[-1, "climbing"]
 		]]
 	],
 	[
@@ -48,7 +48,7 @@
 			["bag", 4],
 			["cards", [
 				[3, "carnivore"],
-				[3, "carnivore"],
+				[4, "carnivore"],
 				[3, "ambush"],
 				[-2, "ambush"]
 			]]
