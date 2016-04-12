@@ -36,6 +36,10 @@ class UpAction(Action):
         """
         board = json[1]
         card = json[2]
+        if not all([isinstance(json[1], int),
+                    isinstance(json[2], int),
+                    len(json) == 3]):
+            raise ValueError("This UpAction is not legitimate")
         return cls(board, card)
 
 
@@ -43,6 +47,12 @@ class PopulationUpAction(UpAction):
     """
     Represents an 'increase population' Action
     """
+    @classmethod
+    def deserialize(cls, json):
+        if not json[0] == "population":
+            raise ValueError("This PopulationUpAction doesn't start with the word `population`")
+        return super(PopulationUpAction, cls).deserialize(json)
+
     def enact(self, player):
         """
         :param player: The player whose population should be increased.
@@ -61,6 +71,13 @@ class BodyUpAction(UpAction):
     """
     Represents an 'increase body size' action
     """
+
+    @classmethod
+    def deserialize(cls, json):
+        if not json[0] == "body":
+            raise ValueError("This BodyUpAction doesn't start with the word `body`")
+        return super(BodyUpAction, cls).deserialize(json)
+
     def enact(self, player):
         creature = player.species[self.board]
         creature.body += 1
@@ -90,6 +107,8 @@ class NewBoardAction(Action):
         :param json: A python Array representing this action as JSON
         :return: a new NewBoardAction
         """
+        if not all([isinstance(json[i], int) for i in range(len(json))]):
+            raise ValueError("This NewBoardAction is invalid")
         b = json.pop(0)
         o = json
         return cls(b, o)

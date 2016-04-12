@@ -78,7 +78,7 @@ class Dealer:
         for player in self.players:
             species_count = len(player.species)
             board = Species() if not species_count else None
-            cards = [self.deck.pop() for _ in range(CARD_DRAW_COUNT + species_count)]
+            cards = [self.deck.pop() for _ in range(CARD_DRAW_COUNT + max(1, species_count))]
             player.add_cards(board, cards)
 
     def step_two_and_three(self):
@@ -134,19 +134,22 @@ class Dealer:
         """
         current_player = self.starting_player
         players = [p for p in self.players]
-        ordered_players = players[-current_player:] + players[:-current_player]
+        ordered_players = players[current_player:] + players[:current_player]
 
         while (ordered_players and self.watering_hole):
             self.feed_one(ordered_players)
 
-        self.starting_player = (self.starting_player + 1) % len(self.players)
+        #This is necessary to make sure we don't move current player index when we eject players
+        if len(ordered_players) == len(players):
+            self.starting_player = (self.starting_player + 1)
+        self.starting_player = self.starting_player % self.players
 
         for player in self.players:
             player.move_tokens_to_bag()
 
     def feed_one(self, players_feeding):
         """ Perform one round of feeding, and mutates the given Players appropriately, including removing
-        :param players_feeding: List of Players, with first to feed at the front
+        :param players_feeding: List of Players, with first to feed at the front, or None if the player must be ejected
         """
         first_player = players_feeding[0]
         rest_players = [p for p in self.players if p is not first_player]
@@ -154,7 +157,14 @@ class Dealer:
         intent = first_player.automatically_choose_species_to_feed(rest_players) or \
                 first_player.feed_next(self.watering_hole, rest_players)
 
-        intent.enact(first_player, rest_players, self)
+        def eject():
+            self.players.remove(first_player)
+            return
+
+        if not intent:
+            return eject()
+        else:
+            intent.enact(first_player, rest_players, self)
 
         if intent.should_end_feeding():
             players_feeding.pop(0)

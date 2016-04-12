@@ -212,8 +212,11 @@ class InternalPlayer(Player):
         :return: a FeedingIntention
         """
         other_players_as_json = [p.serialize_public_info() for p in players]
-        result = self.player_agent.feed_species(watering_hole, self.serialize(), other_players_as_json)
-        return FeedingIntent.deserialize(result)
+        try:
+            result = self.player_agent.feed_species(watering_hole, self.serialize(), other_players_as_json)
+            return FeedingIntent.deserialize(result)
+        except:
+            return None
 
     def automatically_choose_species_to_feed(self, players):
         """ If there's only one possibility, produce an intent that can be automatically carried out by the dealer.
