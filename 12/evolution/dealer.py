@@ -101,10 +101,12 @@ class Dealer:
         :return: a List of TraitCard to be placed in the watering hole
         """
         watering_hole_cards = []
+        #TODO: remove players
         assert(len(action4s) == len(self.players))
         action_players = zip(action4s, self.players)
         for actions, player in action_players:
             if not actions.verify(player):
+                # TODO: remove players
                 assert(False)
             else:
                 food_card = actions.enact(player)

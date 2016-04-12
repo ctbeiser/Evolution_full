@@ -203,7 +203,10 @@ class InternalPlayer(Player):
         location = players.index(self)
         before = [player.serialize_public_info() for player in players[:location]]
         after = [player.serialize_public_info() for player in players[location+1:]]
-        return Action4.deserialize(self.player_agent.choose(before, after))
+        try:
+            return Action4.deserialize(self.player_agent.choose(before, after))
+        except:
+            return None
 
     def feed_next(self, watering_hole, players):
         """
