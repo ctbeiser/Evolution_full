@@ -53,7 +53,7 @@ class Dealer:
         if not self.deck:
             self.deck = TraitCard.new_deck()
             self.deck.sort()
-        for i, player in enumerate(external_players):
+        for i, player in enumerate(external_players, start=1):
             self.players.append(InternalPlayer(i, player))
 
         while not self.game_over():
@@ -62,6 +62,9 @@ class Dealer:
             self.step_four(actions)
 
     def game_over(self):
+        """ Should the game stop?
+        :return: Boolean
+        """
         return sum([CARD_DRAW_COUNT + len(player.species) for player in self.players]) > len(self.deck)
 
     def step_one(self):
@@ -204,6 +207,9 @@ class Dealer:
                 player.cards.append(self.deck.pop(0))
 
     def get_scores(self):
+        """
+        :return: a List(Score, player_id)
+        """
         results = []
         for player in self.players:
             player_score = player.get_score(), player.player_id
