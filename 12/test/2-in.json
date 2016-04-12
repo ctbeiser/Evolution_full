@@ -1,0 +1,57 @@
+[
+	[
+		["id", 3],
+		["species", [
+			[
+				["food", 1],
+				["body", 4],
+				["population", 4],
+				["traits", ["carnivore"]]
+			]
+		]],
+		["bag", 2],
+		["cards", [
+			[-3, "burrowing"],
+			[-3, "carnivore"],
+			[-3, "ambush"],
+			[-3, "climbing"],
+			[-3, "burrowing"],
+			[-3, "carnivore"],
+			[-3, "ambush"],
+			[-3, "climbing"]
+		]]
+	],
+	[
+		[
+			["id", 2],
+			["species", []],
+			["bag", 0],
+			["cards", [
+				[-2, "burrowing"],
+				[1, "carnivore"],
+				[2, "ambush"],
+				[3, "climbing"]
+			]]
+		]
+	],
+	[
+		[
+			["id", 1],
+			["species", [
+				[
+					["food", 3],
+					["body", 5],
+					["population", 5],
+					["traits", ["ambush"]]
+				]
+			]],
+			["bag", 4],
+			["cards", [
+				[3, "carnivore"],
+				[3, "carnivore"],
+				[3, "ambush"],
+				[-2, "ambush"]
+			]]
+		]
+	]
+]
