@@ -132,18 +132,16 @@ class Dealer:
     def feeding(self):
         """ Carry out a round of feeding.
         """
-        current_player = self.starting_player
+        current_player_idx = self.starting_player
         players = [p for p in self.players]
-        ordered_players = players[current_player:] + players[:current_player]
+        before = players[:current_player_idx+1]
+        ordered_players = players[current_player_idx:] + players[:current_player_idx]
 
         while (ordered_players and self.watering_hole):
             self.feed_one(ordered_players)
 
-        #This is necessary to make sure we don't move current player index when we eject players
-        if len(ordered_players) == len(players):
-            self.starting_player = (self.starting_player + 1)
-        self.starting_player = self.starting_player % len(self.players)
-
+        # necessary in case we remove players:
+        self.starting_player = (len([player for player in before if player in self.players])-1 + 1) % len(self.players)
         for player in self.players:
             player.move_tokens_to_bag()
 
