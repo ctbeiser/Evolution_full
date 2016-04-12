@@ -157,6 +157,11 @@ class TraitReplaceAction(Action):
         :param json: A python Array representing this action as JSON
         :return: a new TraitReplaceAction
         """
+        if not all([len(json) == 3,
+                    isinstance(json[0], int),
+                    isinstance(json[1], int),
+                    isinstance(json[2], int)]):
+            raise ValueError("Invalid TraitReplaceAction")
         return cls(*json)
 
     def serialize(self):
