@@ -1,0 +1,25 @@
+[
+	[
+		["id", 3],
+		["species", [
+			[
+				["food", 1],
+				["body", 2],
+				["population", 3],
+				["traits", ["herding"]]
+			], [
+				["food", 1],
+				["body", 1],
+				["population", 1],
+				["traits", ["carnivore"]]
+			]
+		]],
+		["bag", 2],
+		["cards", [
+			[-1, "climbing"], 
+			[2, "ambush"]
+		]]
+	],
+	[],
+	[]
+]

@@ -4,16 +4,27 @@
 		["species", [
 			[
 				["food", 1],
+				["body", 2],
+				["population", 3],
+				["traits", ["herding"]]
+			], [
+				["food", 1],
+				["body", 1],
+				["population", 1],
+				["traits", ["carnivore"]]
+			], [
+				["food", 4],
 				["body", 4],
 				["population", 4],
-				["traits", ["carnivore"]]
+				["traits", ["abmush"]]
 			]
 		]],
 		["bag", 2],
 		["cards", [
-			[-3, "burrowing"],
-			[-3, "carnivore"],
-			[-3, "ambush"],
+			[-1, "climbing"], 
+			[3, "carnivore"], 
+			[2, "ambush"]
+			[1, "ambush"], 
 			[-3, "climbing"]
 		]]
 	],
