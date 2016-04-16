@@ -145,6 +145,7 @@ class Dealer:
         # necessary in case we remove players:
         self.starting_player = (len([player for player in before if player in self.players])-1 + 1) % len(self.players)
         for player in self.players:
+            player.starve_creatures(self.kill_creature)
             player.move_tokens_to_bag()
 
     def feed_one(self, players_feeding):

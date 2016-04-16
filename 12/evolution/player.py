@@ -251,6 +251,14 @@ class InternalPlayer(Player):
             self.bag += s.food
             s.food = 0
 
+    def starve_creatures(self, kill_species):
+        # don't remove creatures from the list while iterating!
+        creatures_copy = [s for s in self.species]
+        for creature in creatures_copy:
+            creature.population = min(creature.population, creature.food)
+            if creature.population <= 0:
+                kill_species(self, self.species.index(creature))
+
 class ExternalPlayer(Player):
 
     def choose(self, before, after):
@@ -370,4 +378,3 @@ class ExternalPlayer(Player):
         """
         can_attack_own = self.feed_carnivore([self])
         return FeedNone() if can_attack_own else None
-
