@@ -269,11 +269,11 @@ class ExternalPlayer(Player):
             board_actions = [NewBoardAction(self.cards.index(sorted_cards.pop(0)), [self.cards.index(sorted_cards.pop(0))])]
 
         if sorted_cards:
-            popup = [PopulationUpAction(len(self.species)-1, self.cards.index(sorted_cards.pop(0)))]
+            popup = [PopulationUpAction(len(self.species), self.cards.index(sorted_cards.pop(0)))]
         if sorted_cards:
-            bodyup = [BodyUpAction(len(self.species)-1, self.cards.index(sorted_cards.pop(0)))]
+            bodyup = [BodyUpAction(len(self.species), self.cards.index(sorted_cards.pop(0)))]
         if sorted_cards:
-            replace = [TraitReplaceAction(len(self.species)-1, 0, self.cards.index(sorted_cards.pop(0)))]
+            replace = [TraitReplaceAction(len(self.species), 0, self.cards.index(sorted_cards.pop(0)))]
 
         actions = Action4(foodcard, popup, bodyup, board_actions, replace)
         return actions.serialize()
@@ -351,9 +351,12 @@ class ExternalPlayer(Player):
                         largest_attackable.append((player_largest_attackable, player))
 
                 def defender_player_key(species_player):
-                    """ Sorts defender_player list based on largest species and then player id"""
+                    """ Sorts defender_player list based on largest species and then player order"""
                     species, player = species_player
-                    return self.species_ordering_key(species)
+                    player_id = player.player_id
+                    if player_id > self.player_id:
+                        player_id -= 1000
+                    return self.species_ordering_key(species), player_id
 
                 defender, player = sorted(largest_attackable, key=defender_player_key)[0]
                 return FeedCarnivore(self.species.index(candidate),players.index(player),player.species.index(defender))

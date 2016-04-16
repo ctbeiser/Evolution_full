@@ -215,9 +215,13 @@ class Dealer:
         :param species_index: Integer representing the index of the Species in player's list of Species
         """
         player.species.pop(species_index)
+        to_add = []
         for i in range(DEAD_CREATURE_REPLACEMENT_CARDS):
             if self.deck:
-                player.cards.append(self.deck.pop(0))
+                to_add.append(self.deck.pop(0))
+        to_add.reverse()
+        for card in to_add:
+            player.cards.insert(0, card)
 
     def get_scores(self):
         """ Get all the scores for this game, in sorted order.
