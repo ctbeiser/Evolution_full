@@ -1,4 +1,5 @@
 from .trait import Trait
+from .validate import *
 
 """
     Contains all feeding intents that can be returned by a Player as a
@@ -27,12 +28,12 @@ class FeedingIntent:
             return FeedNone()
         elif isinstance(data, int):
             return FeedVegetarian(data)
-        elif len(data) == 2:
-            return StoreFat(*data)
-        elif len(data) == 3:
-            return FeedCarnivore(*data)
-        else:
-            assert(False)
+        elif is_list(data):
+            if len(data) == 2:
+                return StoreFat(*data)
+            if len(data) == 3:
+                return FeedCarnivore(*data)
+        raise ValueError("This is not a valid Feeding Intent")
 
     def enact(self, player, others, dealer):
         """ Modifies players to carry out this feeding
@@ -48,6 +49,14 @@ class FeedingIntent:
         """
         return False
 
+    def is_valid(self, player, others, wh):
+        """ Check whether this feeding can be carried out given the state of the game
+        :param player: Player that is feeding
+        :param others: List of the other Players
+        :param wh: the watering hole on which to check for validity
+        :return: a Boolean indicating whether this feeding is invalid for the given dealer
+        """
+        return True
 
 class CannotFeed(FeedingIntent):
     """ Represents the inability to feed any species. """
@@ -57,7 +66,6 @@ class CannotFeed(FeedingIntent):
 
     def should_end_feeding(self):
         return True
-
 
 class FeedNone(FeedingIntent):
     """ Represents the intention to not feed any species. """
@@ -74,13 +82,15 @@ class FeedSpecies(FeedingIntent):
      list of species of the current player. The Species at the index must not
      be fully fed."""
     def __init__(self, species_index):
+        if not is_natural(species_index):
+            raise ValueError("The index of the player is not legal.")
         self.species_index = species_index
 
     def serialize(self):
         return self.species_index
 
-    def deserialize(self, data):
-        self.init(*data)
+    def is_valid(self, player, others, wh):
+        return self.species_index in range(len(player.species))
 
 
 class StoreFat(FeedSpecies):
@@ -89,6 +99,8 @@ class StoreFat(FeedSpecies):
      "fat tissue" trait) """
     def __init__(self, species_index, tokens):
         super().__init__(species_index)
+        if not is_natural_plus(tokens):
+            raise ValueError("There must be at least one fat token.")
         self.tokens = tokens
 
     def serialize(self):
@@ -96,6 +108,14 @@ class StoreFat(FeedSpecies):
 
     def enact(self, player, others, dealer):
         dealer.fat_feed(player, self.species_index, self.tokens)
+
+    def is_valid(self, player, others, wh):
+        if not super(StoreFat, self).is_valid(player, others, wh):
+            return False
+        species = player.species[self.species_index]
+        return all([wh >= self.tokens,
+                   species.has_trait(Trait.FAT_TISSUE),
+                   species.fat_food + self.tokens <= species.body])
 
 
 class FeedVegetarian(FeedSpecies):
@@ -110,6 +130,8 @@ class FeedCarnivore(FeedSpecies):
      attacking the species at defender_index of player at player_index. """
     def __init__(self, species_index, defending_player_index, defender_index):
         super().__init__(species_index)
+        if not is_natural(defending_player_index) and is_natural(defender_index):
+            raise ValueError("This FeedCarnivore has been passed invalid data")
         self.defending_player_index = defending_player_index
         self.defender_index = defender_index
 
@@ -130,3 +152,8 @@ class FeedCarnivore(FeedSpecies):
 
         else:
             dealer.feed_creature(player, self.species_index, scavenge=True)
+
+    def is_valid(self, player, others, wh):
+        return super(FeedCarnivore, self).is_valid(player, others, wh) \
+            and self.defending_player_index in range(len(others)) \
+            and self.defender_index in range(len(others[self.defending_player_index].species))

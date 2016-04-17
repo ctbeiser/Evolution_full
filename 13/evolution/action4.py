@@ -1,4 +1,5 @@
 from .action import *
+from .validate import *
 
 NUMBER_OF_FIELDS = 5
 
@@ -22,11 +23,15 @@ class Action4:
 
     @classmethod
     def deserialize(cls, json):
-        """
+        """ Attempt to deserialize an Action4. May throw a ValueError given invalid JSON.
         :param json: a python Array representing an Action4
         :return: a new Action4
+        :
         """
-        assert(len(json) == NUMBER_OF_FIELDS)
+        if not all([is_list(json),
+                    len(json) == NUMBER_OF_FIELDS,
+                    is_natural(json[0])]):
+            raise ValueError()
         food_index = json[0]
         pops = [PopulationUpAction.deserialize(p) for p in json[1]]
         bodys = [BodyUpAction.deserialize(p) for p in json[2]]
@@ -50,7 +55,10 @@ class Action4:
         :return: True if this Action4 can be applied; else, False.
         """
         cards = self.card_indices()
-        return (not(any(cards.count(x) > 1 for x in cards))) and (max(cards) <= len(player.cards))
+        return all([not(any(cards.count(x) > 1 for x in cards)),
+                   (max(cards) <= len(player.cards)),
+                    self.boards_in_bounds(player),
+                    self.verify_trait_replacements(player)])
 
     def enact(self, player):
         """ Carry out the actions on the given player and remove the TraitCard matching the food_index
@@ -71,10 +79,34 @@ class Action4:
         """
         :return: a List of Integers representing the cards used by this Action 4. Repeats indicate an improper Action4.
         """
-        lists = [[[self.food_index]],
-                 [p.cards() for p in self.grow_populations],
-                 [p.cards() for p in self.grow_bodys],
-                 [p.cards() for p in self.boards_with_traits],
-                 [p.cards() for p in self.trait_replacements]]
-        x = [cardlist for l in lists for cardlist in l]
-        return [card for sublist in x for card in sublist]
+        indice_lists = [p.cards() for p in self.all_actions()]
+        indices = [i for l in indice_lists for i in l]
+        indices.append(self.food_index)
+        return indices
+
+    def all_actions(self):
+        """ Get all Actions that aren't to be placed in the center, in a single flat list.
+        :return: a List<Action>
+        """
+        lists = [[p for p in self.grow_populations],
+                 [p for p in self.grow_bodys],
+                 [p for p in self.boards_with_traits],
+                 [p for p in self.trait_replacements]]
+        items = [item for l in lists for item in l]
+        return items
+
+    def boards_in_bounds(self, player):
+        indices = [p.board_used() for p in self.all_actions()]
+        indices = [i for i in indices if i is not None]
+        for indice in indices:
+            if indice not in range(len(player.cards) + len(self.boards_with_traits)):
+                return False
+        return True
+
+    def verify_trait_replacements(self, player):
+        species = [s for s in player.species]
+        species.extend(self.boards_with_traits)
+        for t in self.trait_replacements:
+            if t.idx_replace not in range(species[t.board_used()].trait_count()):
+                return False
+        return True

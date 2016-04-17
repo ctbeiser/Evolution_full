@@ -69,7 +69,8 @@ class Dealer:
         """ Should the game stop?
         :return: Boolean
         """
-        return sum([CARD_DRAW_COUNT + len(player.species) for player in self.players]) > len(self.deck)
+        return (not self.players) or \
+            sum([CARD_DRAW_COUNT + len(player.species) for player in self.players]) > len(self.deck)
 
     def step_one(self):
         """
@@ -85,7 +86,13 @@ class Dealer:
         """ Carries out steps 2 and 3 of the evolution game, and returns the actions.
         :return: an List of Action4
         """
-        return [p.request_actions(self.players) for p in self.players]
+        # Local copy so we can modify self.players while iterating
+        players = [p for p in self.players]
+        requests = [p.request_actions(self.players) for p in self.players]
+        for r, p in zip(requests, players):
+            if not r:
+                self.players.remove(p)
+        return [r for r in requests if r]
 
     def step_four(self, actions):
         """ Carries out Step4 of the feeding process
@@ -101,16 +108,10 @@ class Dealer:
         :return: a List of TraitCard to be placed in the watering hole
         """
         watering_hole_cards = []
-        #TODO: remove players
-        assert(len(action4s) == len(self.players))
         action_players = zip(action4s, self.players)
         for actions, player in action_players:
-            if not actions.verify(player):
-                # TODO: remove players
-                assert(False)
-            else:
-                food_card = actions.enact(player)
-                watering_hole_cards.append(food_card.food_value)
+            food_card = actions.enact(player)
+            watering_hole_cards.append(food_card.food_value)
         for card in watering_hole_cards:
             self.watering_hole = max(0, self.watering_hole + card)
 
@@ -142,35 +143,32 @@ class Dealer:
         while (ordered_players and self.watering_hole):
             self.feed_one(ordered_players)
 
-        # necessary in case we remove players:
-        self.starting_player = (len([player for player in before if player in self.players])-1 + 1) % len(self.players)
+        if self.players:
+            # the extra complexity here is necessary in the case we remove players: don't want to lose our spot.
+            self.starting_player = (len([player for player in before if player in self.players])-1 + 1) % len(self.players)
         for player in self.players:
             player.starve_creatures(self.kill_creature)
             player.move_tokens_to_bag()
 
     def feed_one(self, players_feeding):
         """ Perform one round of feeding, and mutates the given Players appropriately, including removing
-        :param players_feeding: List of Players, with first to feed at the front, or None if the player must be ejected
+        :param players_feeding: List of Players, with first to feed at the front
         """
         first_player = players_feeding[0]
         rest_players = [p for p in self.players if p is not first_player]
-
-        intent = first_player.automatically_choose_species_to_feed(rest_players) or \
-                first_player.feed_next(self.watering_hole, rest_players)
-
-        def eject():
-            self.players.remove(first_player)
-            return
+        intent = first_player.feed_next(self.watering_hole, rest_players)
 
         if not intent:
-            return eject()
+            self.players.remove(first_player)
+            players_feeding.pop(0)
+            return
         else:
             intent.enact(first_player, rest_players, self)
 
-        if intent.should_end_feeding():
-            players_feeding.pop(0)
-        else:
-            players_feeding.append(players_feeding.pop(0))
+            if intent.should_end_feeding():
+                players_feeding.pop(0)
+            else:
+                players_feeding.append(players_feeding.pop(0))
 
     def feed_creature(self, player, species_index, scavenge=False):
         """ Feed the creature from the watering hole if possible.
@@ -181,7 +179,7 @@ class Dealer:
         """
         species = player.species[species_index]
         if not (species.is_hungry() and self.watering_hole):
-            return None
+            return
         feed_amount = min(1 + species.has_trait(Trait.FORAGING), self.watering_hole, species.population - species.food)
         for feeding in range(feed_amount):
             species.food += 1

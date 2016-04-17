@@ -158,13 +158,13 @@ class Player:
         """
         fat_tissue = [species for species in self.species
                     if species.has_trait(Trait.FAT_TISSUE) and
-                    species.fat_food < species.body]
+                        species.fat_food < species.body]
         carnivores = [species for species in self.species
                     if species.has_trait(Trait.CARNIVORE) and
-                    species.is_hungry()]
+                        species.is_hungry()]
         vegetarians = [species for species in self.species
                     if not species.has_trait(Trait.CARNIVORE) and
-                    species.is_hungry()]
+                        species.is_hungry()]
         return {"fat": fat_tissue, "carn": carnivores, "veg": vegetarians}
 
     def get_score(self):
@@ -204,22 +204,31 @@ class InternalPlayer(Player):
         before = [player.serialize_public_info() for player in players[:location]]
         after = [player.serialize_public_info() for player in players[location+1:]]
         try:
-            return Action4.deserialize(self.player_agent.choose(before, after))
-        except:
+            actions = Action4.deserialize(self.player_agent.choose(before, after))
+            actions.verify(self)
+            return actions
+        except ValueError:
             return None
 
     def feed_next(self, watering_hole, players):
         """
         :param watering_hole: an Integer representing the food tokens in the Watering Hole
         :param players: other Players in the game
-        :return: a FeedingIntention
+        :return: a FeedingIntention, or None in the case of an invalid feeding
         """
         other_players_as_json = [p.serialize_public_info() for p in players]
-        try:
-            result = self.player_agent.feed_species(watering_hole, self.serialize(), other_players_as_json)
-            return FeedingIntent.deserialize(result)
-        except:
-            return None
+        feeding = self.automatically_choose_species_to_feed(players)
+        if feeding:
+            assert (feeding.is_valid(self, players, watering_hole))  # Should never fail, but if it does, we want to know before ship
+            return feeding
+        else:
+            try:
+                result = self.player_agent.feed_species(watering_hole, self.serialize(), other_players_as_json)
+                feeding = FeedingIntent.deserialize(result)
+                if feeding.is_valid(self, players, watering_hole):
+                    return feeding
+            except ValueError:
+                return None
 
     def automatically_choose_species_to_feed(self, players):
         """ If there's only one possibility, produce an intent that can be automatically carried out by the dealer.
@@ -242,9 +251,6 @@ class InternalPlayer(Player):
 
         elif len(hungry_veg) == 1 and not fat:
             return FeedVegetarian(self.species.index(hungry_veg[0]))
-
-        elif fat and len(fat) == 1 and not hungry_veg:
-            StoreFat(fat[0])
 
     def move_tokens_to_bag(self):
         for s in self.species:

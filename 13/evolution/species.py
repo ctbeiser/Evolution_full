@@ -162,3 +162,6 @@ class Species:
         :return: true if the this species is hungry
         """
         return self.food < self.population
+
+    def trait_count(self):
+        return len(self.traits)

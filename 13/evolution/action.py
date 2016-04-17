@@ -1,5 +1,7 @@
 from .species import Species
+from .validate import *
 
+MAX_NEW_BOARD_LENGTH = 4
 
 class Action:
     def cards(self):
@@ -14,6 +16,19 @@ class Action:
         """
         pass
 
+    @staticmethod
+    def boards_created():
+        """ Does this action create a board?
+        :return: Boolean
+        """
+        return False
+
+    def board_used(self):
+        """
+        Get any species board affected by this action
+        :return: Integer or None
+        """
+        return
 
 class UpAction(Action):
     def __init__(self, board, card):
@@ -28,19 +43,29 @@ class UpAction(Action):
     def cards(self):
         return [self.card]
 
+    def board_used(self):
+        """
+        Get the list of species boards affected by this action
+        :return: List of Integer
+        """
+        return self.board
+
     @classmethod
     def deserialize(cls, json):
         """ Create an *UpAction from a JSON input
         :param json: A JSON representation of an *UpAction
         :return: A new *UpAction
         """
+        if not all([is_list(json),
+                    len(json) == 3,
+                    is_natural(json[1]),
+                    is_natural(json[2])]):
+            raise ValueError("This UpAction is not legitimate")
         board = json[1]
         card = json[2]
-        if not all([isinstance(json[1], int),
-                    isinstance(json[2], int),
-                    len(json) == 3]):
-            raise ValueError("This UpAction is not legitimate")
         return cls(board, card)
+
+
 
 
 class PopulationUpAction(UpAction):
@@ -107,7 +132,9 @@ class NewBoardAction(Action):
         :param json: A python Array representing this action as JSON
         :return: a new NewBoardAction
         """
-        if not all([isinstance(json[i], int) for i in range(len(json))]):
+        if not (all([is_list(json),
+                     len(json) <= MAX_NEW_BOARD_LENGTH]) and
+            all([is_natural(i) for i in range(len(json))])):
             raise ValueError("This NewBoardAction is invalid")
         b = json.pop(0)
         o = json
@@ -133,6 +160,16 @@ class NewBoardAction(Action):
         traits = [hand[c].trait for c in self.other_cards]
         player.species.append(Species(traits=traits))
 
+    @staticmethod
+    def boards_created():
+        """ Does this action create a board?
+        :return: Boolean
+        """
+        return True
+
+    def trait_count(self):
+        return len(self.other_cards)
+
 
 class TraitReplaceAction(Action):
     """
@@ -157,10 +194,11 @@ class TraitReplaceAction(Action):
         :param json: A python Array representing this action as JSON
         :return: a new TraitReplaceAction
         """
-        if not all([len(json) == 3,
-                    isinstance(json[0], int),
-                    isinstance(json[1], int),
-                    isinstance(json[2], int)]):
+        if not all([is_list(json),
+                    len(json) == 3,
+                    is_natural(json[0]),
+                    is_natural(json[1]),
+                    is_natural(json[2])]):
             raise ValueError("Invalid TraitReplaceAction")
         return cls(*json)
 
@@ -176,3 +214,10 @@ class TraitReplaceAction(Action):
         """
         card = player.cards[self.with_card].trait
         player.species[self.board].replace_trait_at_index(self.idx_replace, card)
+
+    def board_used(self):
+        """
+        Get the list of species boards affected by this action
+        :return: List of Integer
+        """
+        return self.board
