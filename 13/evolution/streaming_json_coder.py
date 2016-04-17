@@ -7,6 +7,8 @@ concatenated JSON stream and writes
 
 import json
 import socket
+from .dealer import MAX_PLAYERS
+from .timeout import *
 
 
 class StreamingJSONCoder:
@@ -20,23 +22,18 @@ class StreamingJSONCoder:
     class IncompleteBufferException(ValueError):
         """ Raised when the buffer doesn't contain a full valid JSON bytestring """
 
-    def __init__(self, host, port):
+    def __init__(self, sock):
         """ Initializes the decoder.
         :param host: stream host as a string
         :param port: stream port as an integer
         """
-        self.host = host
-        self.port = port
-
         self.buffer = bytes()
+        self.sock = sock
 
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((self.host, self.port))
-
+    @timeout(5)
     def decode(self):
-        """ A generator method that continuously returns parsed JSON
-        objects until the connection is broken.
-        INVARIANT from the project description: the data sent is valid JSON
+        """ A method that produces a message from the player as JSON
+        INVARIANT: There will be a maximum of one message waiting
         :return:
         """
         while True:
@@ -45,12 +42,9 @@ class StreamingJSONCoder:
 
             if data:
                 self.buffer += data
-            else:
-                raise StopIteration()
-
             try:
                 parsed = self.parse_buffer()
-                yield parsed
+                return parsed
             except self.IncompleteBufferException:
                 pass
 
@@ -72,6 +66,14 @@ class StreamingJSONCoder:
         """
         encoded_data = json.dumps(data).encode(self.ENCODING)
         self.sock.sendall(encoded_data + b'\n')
+
+    def send_and_get_response(self, data):
+        self.encode(data)
+        result = self.decode()
+        # Ensure there's nothing hanging onto the end of the socket— if so, we should eject it.
+        if self.sock.recv(self.BYTE_SIZE):
+            raise ValueError("Invalid response from Player")
+        return result
 
     def shutdown(self):
         """ Closes the socket connection
