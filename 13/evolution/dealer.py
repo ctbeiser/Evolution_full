@@ -5,6 +5,8 @@ from .species import Species
 
 DEAD_CREATURE_REPLACEMENT_CARDS = 2
 CARD_DRAW_COUNT = 3
+MAX_PLAYERS = 8
+MIN_PLAYERS = 3
 
 class Dealer:
     """

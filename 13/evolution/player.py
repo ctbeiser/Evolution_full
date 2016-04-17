@@ -54,9 +54,13 @@ class Player:
             serialized.append([CARDS_JSON_NAME, [card.serialize() for card in self.cards]])
         return serialized
 
-    def serialize_public_info(self):
-        data = self.serialize()
-        return [i for i in data if i[0] != BAG_JSON_NAME and i[0] != CARDS_JSON_NAME]
+    def serialize_species(self):
+        return [s.serialize() for s in self.species]
+
+    @classmethod
+    def deserialize_species(cls, data):
+        assert(is_list(data))
+        return cls(0, species=[Species.deserialize(s) for s in data])
 
     @staticmethod
     def get_params_from_json(data):
@@ -201,8 +205,8 @@ class InternalPlayer(Player):
         :return: a new Action4
         """
         location = players.index(self)
-        before = [player.serialize_public_info() for player in players[:location]]
-        after = [player.serialize_public_info() for player in players[location+1:]]
+        before = [player.serialize_species() for player in players[:location]]
+        after = [player.serialize_species() for player in players[location+1:]]
         try:
             actions = Action4.deserialize(self.player_agent.choose(before, after))
             actions.verify(self)
@@ -216,7 +220,7 @@ class InternalPlayer(Player):
         :param players: other Players in the game
         :return: a FeedingIntention, or None in the case of an invalid feeding
         """
-        other_players_as_json = [p.serialize_public_info() for p in players]
+        other_players_as_json = [p.serialize_species() for p in players]
         feeding = self.automatically_choose_species_to_feed(players)
         if feeding:
             assert (feeding.is_valid(self, players, watering_hole))  # Should never fail, but if it does, we want to know before ship
@@ -300,7 +304,7 @@ class ExternalPlayer(Player):
         :return: A JSON representation of the changed species
         """
         self.rehydrate(newself)
-        players = [Player.deserialize(player_json) for player_json in players]
+        players = [Player.deserialize_species(player_json) for player_json in players]
         return self.next_species_to_feed(players, watering_hole).serialize()
 
     def next_species_to_feed(self, players, watering_hole):

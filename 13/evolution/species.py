@@ -4,12 +4,19 @@ Represents a Species in the Evolution game.
 
 """
 from .trait import Trait, HARD_SHELL_THRESHOLD
+from .validate import *
 
 SPECIES_DEFAULT_FOOD = 0
 SPECIES_DEFAULT_BODY = 0
 SPECIES_DEFAULT_POPULATION = 1
 SPECIES_MAX_POPULATION = 7
 SPECIES_DEFAULT_FAT_FOOD = 0
+FOOD_NAME = 'food'
+BODY_NAME = 'body'
+POPULATION_NAME = 'population'
+TRAITS_NAME = 'traits'
+FAT_FOOD_NAME = 'fat-food'
+MAX_TRAITS = 3
 
 
 class Species:
@@ -52,7 +59,9 @@ class Species:
     def verify_traits(self):
         if not self.has_trait(Trait.FAT_TISSUE):
             self.fat_food = 0
-        assert(not(any(self.traits.count(x) > 1 for x in self.traits)))
+        if not all([(not(any(self.traits.count(x) > 1 for x in self.traits))),
+                   len(self.traits) <= MAX_TRAITS]):
+            raise ValueError()
 
     def make_tree(self, tree, parent):
         """ Modify the ttk tree provided to add a representation of this data structure
@@ -81,38 +90,49 @@ class Species:
 
            [ ["food",Nat],
              ["body",Nat],
-             ["population",Nat],
+             ["population",Nat+],
              ["traits",LOT],
              ["fat-food", Nat] ]
 
         where LOT is a list of trait strings.
 
-        :param data: Species+
+        :param data: a Species+ as JSON
         :return: Species object
         """
+        # Ensure the items are in order:
+        if not all([is_list(data),
+                    4 <= len(data) <= 5,
+                    all([is_list(i) for i in data]),
+                    all([(len(i) == 2) for i in data]),
+                    data[0][0] == FOOD_NAME,
+                    data[1][0] == BODY_NAME,
+                    data[2][0] == POPULATION_NAME,
+                    data[3][0] == TRAITS_NAME]):
+            raise ValueError()
+
         parameters = {parameter: value for parameter, value in data}
-        trait_list = parameters.pop("traits", [])
+        trait_list = parameters.pop(TRAITS_NAME, [])
         traits = [Trait(trait) for trait in trait_list]
 
-        return cls(food=parameters.get('food'),
-                   body=parameters.get('body'),
-                   population=parameters.get('population'),
+        return cls(food=parameters.get(FOOD_NAME),
+                   body=parameters.get(BODY_NAME),
+                   population=parameters.get(POPULATION_NAME),
                    traits=traits,
-                   fat_food=parameters.get('fat-food'))
+                   fat_food=parameters.get(FAT_FOOD_NAME))
 
     def serialize(self):
         """ Generates a data representation of Species
         :return: data representation of the Species
         """
         data = [
-            ["food", self.food],
-            ["body", self.body],
-            ["population", self.population],
-            ["traits", [trait.value for trait in self.traits]],
+            [FOOD_NAME, self.food],
+            [BODY_NAME, self.body],
+            [POPULATION_NAME, self.population],
+            [TRAITS_NAME, [trait.value for trait in self.traits]],
         ]
 
         if self.has_trait(Trait.FAT_TISSUE) and self.fat_food:
-            data.append(["fat-food", self.fat_food])
+            data.append([FAT_FOOD_NAME, self.fat_food])
 
         return data
 
