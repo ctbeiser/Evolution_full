@@ -1,19 +1,17 @@
-import sys
-import json
-
-from evolution.dealer import Dealer, MIN_PLAYERS
 from evolution.player import *
-from evolution.server import Server
+from evolution.proxy_dealer import ProxyDealer
+from evolution.streaming_json_coder import StreamingJSONCoder
+from time import sleep
+import socket
 
-server = Server("localhost", 45678)
-remote_players = server.add_players()
+def initialize_socket(host, port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((host, port))
+    return sock
 
-dealer = Dealer()
-proxies = [ProxyPlayer(p) for p in remote_players]
-dealer.play_game(proxies)
+sleep(2)
+coder = StreamingJSONCoder(initialize_socket("localhost", 45678))
+dealer = ProxyDealer(coder)
+dealer.begin()
 
-scores = dealer.get_scores()
 
-for x, player_score in enumerate(scores):
-    out_string = str(x+1) + " player id: " + str(scores[x][1]) + " score: " + str(scores[x][0])
-    sys.stdout.write(out_string + "\n")

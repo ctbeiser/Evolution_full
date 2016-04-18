@@ -1,0 +1,58 @@
+Purpose: Implement the main method, dealer, and silly player strategy with respect to the Internal Protocol. Additionally write a test harness for the silly player and modify the protocol for a future networked game
+
+evolution/dealer.py
+	Contains a representation of the Dealer in the game
+evolution/traitcard.py
+	Contains a representation of Trait Cards in the game
+evolution/feeding_intent.py
+	Contains all possible feeding intents returnable by Player
+evolution/gui.py
+	Contains a script that produces GUIs from dealers and players.
+evolution/player.py
+	Contains a representation of Player in the game
+evolution/species.py
+	Contains a representation of Species boards in the game
+evolution/trait.py
+	Contains a representation of Traits in the game
+evolution/action.py
+	Contains the representations of all possible player actions with Trait Cards
+evolution/action4.py
+	Contains the representation of all requested player actions for a turn
+test/*
+	JSON test cases for xsilly
+
+Tests:
+evolution/test_feeding_intent.py
+	Tests for feeding_intent.py
+evolution/test_player.py
+	Tests for player.py
+evolution/test_species.py
+	Tests for species.py
+evolution/test_dealer.py
+	Tests for dealer.py
+evolution/test_actions.py
+	Tests for actions.py
+
+xsilly.py
+	A test harness for testing the silly player strategy. Accepts input from stdin and outputs to stdout
+xsilly
+	A bash script that calls xsilly.py
+main.py
+	Creates a dealer and a number players passed in from stdin, instructs the dealer to run a game, and prints results to stdout
+main
+	A bash script that calls main.py with passed command line args
+compile
+	Exits with code 0
+remote.txt
+	The modified Internal Protocol for task 5 
+
+Task 2 
+The code for Task 2 can be found/read in dealer.py. Begin by reading the playGame() method then continue to step1(), step_two_and_three(), and step4()
+
+Task 3
+The code for Task 3 can be found in player.py. Begin at the Player super class by reading the rehydrate method which represents the start() method in the protocol. Continue at the class definition for an ExternalPlayer and read the methods choose and feed_species which represents feednext() from the protocol. 
+
+The rest of the code can be read beginning with main.py. Read that file in its entirety then continue to dealer.py. The read action4.py, action.py, and finally player.py
+
+The tests can be run with the following command:
+    python3 -m unittest

@@ -30,8 +30,11 @@ class StreamingJSONCoder:
         self.buffer = bytes()
         self.sock = sock
 
-    @timeout(5)
+    @timeout(6)
     def decode(self):
+        return self.decode_without_timeout()
+
+    def decode_without_timeout(self):
         """ A method that produces a message from the player as JSON
         INVARIANT: There will be a maximum of one message waiting
         :return:
@@ -74,7 +77,8 @@ class StreamingJSONCoder:
         except TimedOutError:
             raise ValueError("No response arrived")
         # Ensure there's exactly one thing returned
-        if self.sock.recv(self.BYTE_SIZE) or not result:
+        anything = self.sock.recv(self.BYTE_SIZE)
+        if (anything and anything != b'\n') or not result:
             raise ValueError("Invalid response from Player")
         return result
 

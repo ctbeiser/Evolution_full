@@ -1,8 +1,7 @@
 
 
 def is_natural(maybe_nat):
-    return all([isinstance(maybe_nat, int),
-                maybe_nat >= 0])
+    return isinstance(maybe_nat, int) and maybe_nat >= 0
 
 
 def is_natural_plus(maybe_nat):

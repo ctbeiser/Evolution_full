@@ -7,7 +7,6 @@ from .feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, C
 from .traitcard import TraitCard
 from .action4 import Action4
 from .action import *
-import json
 
 DEFAULT_BAG_VALUE = 0
 BAG_JSON_NAME = "bag"
@@ -63,22 +62,27 @@ class Player:
                       [p.serialize_species() for p in others]]
         return serialized
 
+    def rehydrate_from_state_without_others(self, data):
+        if not is_list(data):
+            raise TypeError(data)
+        data.extend([0, []])
+        self.rehydrate_from_state(data)
+
     def rehydrate_from_state(self, data):
-        if not all([
-            is_list(data),
+        if not(all([is_list(data),
             len(data) == 5,
             is_natural(data[0]),
             is_list(data[1]),
             is_list(data[2]),
             is_natural(data[3]),
-            is_list(data[4])]):
+            is_list(data[4])])):
             raise ValueError()
         else:
             self.bag = data[0]
             self.species = [Species.deserialize(species) for species in data[1]]
             self.cards = [TraitCard.deserialize(card) for card in data[2]]
             watering_hole = data[3]
-            others = [species.deserialize(species) for slist in json[4] for species in slist]
+            others = [Species.deserialize(species) for slist in data[4] for species in slist]
             return (watering_hole, others)
 
     def serialize_species(self):
@@ -224,7 +228,7 @@ class InternalPlayer(Player):
         self.cards.extend(cards)
         if board:
             self.species.append(board)
-        self.player_agent.start(self.serialize())
+        self.player_agent.start(self.produce_state(0, [])[:3])
 
     def request_actions(self, players):
         """ Request an Action4 for this turn from the ExternalPlayer
@@ -253,6 +257,9 @@ class InternalPlayer(Player):
             return feeding
         else:
             try:
+                ps = [p for p in players]
+                # HACK! This is necessary because we no longer pass in player IDs. Yikes.
+                ps = ps[self.player_id:] + ps[:self.player_id]
                 result = self.player_agent.feed_species(self.produce_state(watering_hole, players))
                 feeding = FeedingIntent.deserialize(result)
                 if feeding.is_valid(self, players, watering_hole):
@@ -322,16 +329,13 @@ class ExternalPlayer(Player):
         actions = Action4(foodcard, popup, bodyup, board_actions, replace)
         return actions.serialize()
 
-    def feed_species(self, watering_hole, newself, players):
+    def feed_species(self, state):
         """
-        :param watering_hole: an Integer representing the state of the Watering Hole
-        :param newself: a Json representation of the updated state of this player.
-        :param players: A list of all other players, as JSON, without specific data
+        :param state: a State
         :return: A JSON representation of the changed species
         """
-        self.rehydrate(newself)
-        players = [Player.deserialize_species(player_json) for player_json in players]
-        return self.next_species_to_feed(players, watering_hole).serialize()
+        wh, players = self.rehydrate_from_state(state)
+        return self.next_species_to_feed(players, wh).serialize()
 
     def next_species_to_feed(self, players, watering_hole):
         """ Determines the next species to feed, given the other players in the game.
@@ -397,10 +401,11 @@ class ExternalPlayer(Player):
                 def defender_player_key(species_player):
                     """ Sorts defender_player list based on largest species and then player order"""
                     species, player = species_player
-                    player_id = player.player_id
-                    if player_id > self.player_id:
-                        player_id -= 1000
-                    return self.species_ordering_key(species), player_id
+                    # The following has been removed for lack of support in the protocol.
+                    #player_id = player.player_id
+                    #if player_id > self.player_id:
+                        #player_id -= 1000
+                    return self.species_ordering_key(species), #player_id
 
                 defender, player = sorted(largest_attackable, key=defender_player_key)[0]
                 return FeedCarnivore(self.species.index(candidate),players.index(player),player.species.index(defender))
@@ -425,12 +430,18 @@ class ProxyPlayer:
         self.proxy = proxy
 
     def start(self, msg):
-        self.proxy.encode(json.dumps(msg))
+        self.proxy.encode(msg)
 
     def choose(self, before, after):
-        maybe_raw_json_response = self.proxy.send_and_get_response(json.dumps([before, after]))
-        return Action4.deserialize(json.loads(maybe_raw_json_response))
+        try:
+            maybe_raw_json_response = self.proxy.send_and_get_response([before, after])
+            return maybe_raw_json_response
+        except ConnectionResetError:
+            raise ValueError
 
     def feed_species(self, state):
-        maybe_raw_json_response = self.proxy.send_and_get_response(json.dumps(state))
-        return FeedingIntent.deserialize(json.loads(maybe_raw_json_response))
+        try:
+            maybe_raw_json_response = self.proxy.send_and_get_response(state)
+            return FeedingIntent.deserialize(maybe_raw_json_response)
+        except ConnectionResetError:
+            raise ValueError

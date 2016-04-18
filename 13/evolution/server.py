@@ -15,7 +15,6 @@ class Server():
 
     def add_players(self):
         while len(self.connected_players) < 3:
-            print("trying")
             try:
                 self.check_for_new_players()
             except:
@@ -25,10 +24,8 @@ class Server():
 
     @timeout(5)
     def add_to_8(self):
-        print("that's three")
         while len(self.connected_players) < 8:
             try:
-                print("trian")
                 self.check_for_new_players()
             except:
                 break
@@ -37,7 +34,6 @@ class Server():
         x = self.blocking_call_to_socket_to_get_players()
         if x:
             clientsocket, addr = x
-            print('Incoming connection from %s' % repr(addr))
             self.add_new_player(clientsocket)
 
     @timeout(5)
@@ -49,7 +45,6 @@ class Server():
         info = player.decode()
         if is_string(info):
             player.encode("ok")
-            print("ok")
             self.connected_players.append(player)
         else:
             player.shutdown()
