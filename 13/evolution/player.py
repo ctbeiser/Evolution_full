@@ -7,6 +7,7 @@ from .feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, C
 from .traitcard import TraitCard
 from .action4 import Action4
 from .action import *
+import json
 
 DEFAULT_BAG_VALUE = 0
 BAG_JSON_NAME = "bag"
@@ -53,6 +54,32 @@ class Player:
         if self.cards:
             serialized.append([CARDS_JSON_NAME, [card.serialize() for card in self.cards]])
         return serialized
+
+    def produce_state(self, watering_hole, others):
+        serialized = [self.bag,
+                      [species.serialize() for species in self.species],
+                      [card.serialize() for card in self.cards],
+                      watering_hole,
+                      [p.serialize_species() for p in others]]
+        return serialized
+
+    def rehydrate_from_state(self, data):
+        if not all([
+            is_list(data),
+            len(data) == 5,
+            is_natural(data[0]),
+            is_list(data[1]),
+            is_list(data[2]),
+            is_natural(data[3]),
+            is_list(data[4])]):
+            raise ValueError()
+        else:
+            self.bag = data[0]
+            self.species = [Species.deserialize(species) for species in data[1]]
+            self.cards = [TraitCard.deserialize(card) for card in data[2]]
+            watering_hole = data[3]
+            others = [species.deserialize(species) for slist in json[4] for species in slist]
+            return (watering_hole, others)
 
     def serialize_species(self):
         return [s.serialize() for s in self.species]
@@ -197,7 +224,7 @@ class InternalPlayer(Player):
         self.cards.extend(cards)
         if board:
             self.species.append(board)
-        self.player_agent.rehydrate(self.serialize())
+        self.player_agent.start(self.serialize())
 
     def request_actions(self, players):
         """ Request an Action4 for this turn from the ExternalPlayer
@@ -220,14 +247,13 @@ class InternalPlayer(Player):
         :param players: other Players in the game
         :return: a FeedingIntention, or None in the case of an invalid feeding
         """
-        other_players_as_json = [p.serialize_species() for p in players]
         feeding = self.automatically_choose_species_to_feed(players)
         if feeding:
             assert (feeding.is_valid(self, players, watering_hole))  # Should never fail, but if it does, we want to know before ship
             return feeding
         else:
             try:
-                result = self.player_agent.feed_species(watering_hole, self.serialize(), other_players_as_json)
+                result = self.player_agent.feed_species(self.produce_state(watering_hole, players))
                 feeding = FeedingIntent.deserialize(result)
                 if feeding.is_valid(self, players, watering_hole):
                     return feeding
@@ -388,3 +414,23 @@ class ExternalPlayer(Player):
         """
         can_attack_own = self.feed_carnivore([self])
         return FeedNone() if can_attack_own else None
+
+
+class ProxyPlayer:
+
+    def __init__(self, proxy):
+        """ Creates a player that acts as an ExternalPlayer, by connecting to it remotely using a StreamingJsonCoder
+        :param proxy:
+        """
+        self.proxy = proxy
+
+    def start(self, msg):
+        self.proxy.encode(json.dumps(msg))
+
+    def choose(self, before, after):
+        maybe_raw_json_response = self.proxy.send_and_get_response(json.dumps([before, after]))
+        return Action4.deserialize(json.loads(maybe_raw_json_response))
+
+    def feed_species(self, state):
+        maybe_raw_json_response = self.proxy.send_and_get_response(json.dumps(state))
+        return FeedingIntent.deserialize(json.loads(maybe_raw_json_response))

@@ -21,6 +21,7 @@ class Server():
             except:
                 pass
         self.add_to_8()
+        return self.connected_players
 
     @timeout(5)
     def add_to_8(self):

@@ -69,9 +69,12 @@ class StreamingJSONCoder:
 
     def send_and_get_response(self, data):
         self.encode(data)
-        result = self.decode()
-        # Ensure there's nothing hanging onto the end of the socket— if so, we should eject it.
-        if self.sock.recv(self.BYTE_SIZE):
+        try:
+            result = self.decode()
+        except TimedOutError:
+            raise ValueError("No response arrived")
+        # Ensure there's exactly one thing returned
+        if self.sock.recv(self.BYTE_SIZE) or not result:
             raise ValueError("Invalid response from Player")
         return result
 
