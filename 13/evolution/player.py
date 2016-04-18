@@ -60,6 +60,7 @@ class Player:
                       [card.serialize() for card in self.cards],
                       watering_hole,
                       [p.serialize_species() for p in others]]
+        print(serialized)
         return serialized
 
     def rehydrate_from_state_without_others(self, data):
@@ -69,13 +70,14 @@ class Player:
         self.rehydrate_from_state(data)
 
     def rehydrate_from_state(self, data):
-        if not(all([is_list(data),
-            len(data) == 5,
-            is_natural(data[0]),
-            is_list(data[1]),
-            is_list(data[2]),
-            is_natural(data[3]),
-            is_list(data[4])])):
+        print(data)
+        if not(is_list(data) and
+            len(data) == 5 and
+            is_natural(data[0]) and
+            is_list(data[1]) and
+            is_list(data[2]) and
+            is_natural(data[3]) and
+            is_list(data[4])):
             raise ValueError()
         else:
             self.bag = data[0]
@@ -83,6 +85,7 @@ class Player:
             self.cards = [TraitCard.deserialize(card) for card in data[2]]
             watering_hole = data[3]
             others = [Species.deserialize(species) for slist in data[4] for species in slist]
+            print(self.bag, self.species, self.cards, watering_hole, others)
             return (watering_hole, others)
 
     def serialize_species(self):

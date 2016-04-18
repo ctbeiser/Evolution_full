@@ -17,7 +17,7 @@ class ProxyDealer:
         self.update_for_start()
         while True:
             self.wait_for_choice_request()
-            self.wait_for_feed_species()
+            self.wait_for_feed_species_and_restart()
 
     def wait_for_ok(self):
         try:
@@ -50,11 +50,17 @@ class ProxyDealer:
             print("Timeout")
             exit()
 
-    def wait_for_feed_species(self):
+    def wait_for_feed_species_and_restart(self):
         try:
             print("trying wait for feed")
             request = self.coder.decode_without_timeout()
-            self.coder.encode(self.player.feed_species(request))
+            if len(request) == 3:
+                print('rehydrating instead')
+                self.player.rehydrate_from_state_without_others(request)
+            else:
+                self.coder.encode(self.player.feed_species(request))
+                self.update_for_start()
+
         except (TimedOutError, ValueError):
             print("notfed")
             exit()
