@@ -21,46 +21,41 @@ class ProxyDealer:
 
     def wait_for_ok(self):
         try:
-            print("trying wait ok")
             result = self.coder.decode_without_timeout()
             if not result == "ok":
                 raise ValueError()
-        except (TimedOutError, ValueError):
-            print("failed OK")
-            exit()
+        except:
+            self.coder.shutdown()
+            exit(1)
 
     def update_for_start(self):
         try:
-            print("trying update start")
             result = self.coder.decode_without_timeout()
             self.player.rehydrate_from_state_without_others(result)
-        except (TimedOutError, ValueError):
-            print("waiting for start")
-            exit()
+        except:
+            self.coder.shutdown()
+            exit(1)
 
     def wait_for_choice_request(self):
         try:
-            print("trying wait choice req")
             request = self.coder.decode_without_timeout()
             response = self.player.choose(request[0], request[1])
-            print(response)
             self.coder.encode(response)
-            print("sent")
-        except (TimedOutError, ValueError):
-            print("Timeout")
-            exit()
+        except:
+            self.coder.shutdown()
+            exit(1)
 
     def wait_for_feed_species_and_restart(self):
-        try:
-            print("trying wait for feed")
-            request = self.coder.decode_without_timeout()
-            if len(request) == 3:
-                print('rehydrating instead')
-                self.player.rehydrate_from_state_without_others(request)
-            else:
-                self.coder.encode(self.player.feed_species(request))
-                self.update_for_start()
 
-        except (TimedOutError, ValueError):
-            print("notfed")
-            exit()
+        try:
+            while True:
+                request = self.coder.decode_without_timeout()
+                if len(request) == 3:
+                    self.player.rehydrate_from_state_without_others(request)
+                    return
+                else:
+                    self.coder.encode(self.player.feed_species(request))
+
+        except:
+            self.coder.shutdown()
+            exit(1)

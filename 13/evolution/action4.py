@@ -28,9 +28,12 @@ class Action4:
         :return: a new Action4
         :
         """
-        if not all([is_list(json),
+        try:
+            if not all([is_list(json),
                     len(json) == NUMBER_OF_FIELDS,
                     is_natural(json[0])]):
+                raise ValueError()
+        except:
             raise ValueError()
         food_index = json[0]
         pops = [PopulationUpAction.deserialize(p) for p in json[1]]
@@ -55,10 +58,13 @@ class Action4:
         :return: True if this Action4 can be applied; else, False.
         """
         cards = self.card_indices()
-        return all([not(any(cards.count(x) > 1 for x in cards)),
+        try:
+            return all([not(any(cards.count(x) > 1 for x in cards)),
                    (max(cards) <= len(player.cards)),
                     self.boards_in_bounds(player),
                     self.verify_trait_replacements(player)])
+        except:
+            return False
 
     def enact(self, player):
         """ Carry out the actions on the given player and remove the TraitCard matching the food_index

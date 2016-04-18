@@ -30,7 +30,7 @@ class StreamingJSONCoder:
         self.buffer = bytes()
         self.sock = sock
 
-    @timeout(6)
+    @timeout(3)
     def decode(self):
         return self.decode_without_timeout()
 

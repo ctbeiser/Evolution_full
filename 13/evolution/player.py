@@ -60,33 +60,32 @@ class Player:
                       [card.serialize() for card in self.cards],
                       watering_hole,
                       [p.serialize_species() for p in others]]
-        print(serialized)
         return serialized
 
     def rehydrate_from_state_without_others(self, data):
         if not is_list(data):
-            raise TypeError(data)
+            raise ValueError(data)
         data.extend([0, []])
         self.rehydrate_from_state(data)
 
     def rehydrate_from_state(self, data):
-        print(data)
-        if not(is_list(data) and
+        try:
+            if not(is_list(data) and
             len(data) == 5 and
             is_natural(data[0]) and
             is_list(data[1]) and
             is_list(data[2]) and
             is_natural(data[3]) and
             is_list(data[4])):
+                raise ValueError()
+        except:
             raise ValueError()
-        else:
-            self.bag = data[0]
-            self.species = [Species.deserialize(species) for species in data[1]]
-            self.cards = [TraitCard.deserialize(card) for card in data[2]]
-            watering_hole = data[3]
-            others = [Species.deserialize(species) for slist in data[4] for species in slist]
-            print(self.bag, self.species, self.cards, watering_hole, others)
-            return (watering_hole, others)
+        self.bag = data[0]
+        self.species = [Species.deserialize(species) for species in data[1]]
+        self.cards = [TraitCard.deserialize(card) for card in data[2]]
+        watering_hole = data[3]
+        others = [Species.deserialize(species) for slist in data[4] for species in slist]
+        return (watering_hole, others)
 
     def serialize_species(self):
         return [s.serialize() for s in self.species]
@@ -439,11 +438,12 @@ class ProxyPlayer:
             maybe_raw_json_response = self.proxy.send_and_get_response([before, after])
             return maybe_raw_json_response
         except ConnectionResetError:
-            raise ValueError
+            raise ValueError()
 
     def feed_species(self, state):
         try:
             maybe_raw_json_response = self.proxy.send_and_get_response(state)
             return maybe_raw_json_response
+
         except ConnectionResetError:
-            raise ValueError
+            raise ValueError()
