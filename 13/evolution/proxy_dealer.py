@@ -14,8 +14,8 @@ class ProxyDealer:
 
     def begin(self):
         self.wait_for_ok()
+        self.update_for_start()
         while True:
-            self.update_for_start()
             self.wait_for_choice_request()
             self.wait_for_feed_species()
 

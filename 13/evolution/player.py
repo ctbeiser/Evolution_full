@@ -257,13 +257,12 @@ class InternalPlayer(Player):
             return feeding
         else:
             try:
-                ps = [p for p in players]
-                # HACK! This is necessary because we no longer pass in player IDs. Yikes.
-                ps = ps[self.player_id:] + ps[:self.player_id]
                 result = self.player_agent.feed_species(self.produce_state(watering_hole, players))
                 feeding = FeedingIntent.deserialize(result)
                 if feeding.is_valid(self, players, watering_hole):
                     return feeding
+                else:
+                    raise ValueError()
             except ValueError:
                 return None
 
@@ -442,6 +441,6 @@ class ProxyPlayer:
     def feed_species(self, state):
         try:
             maybe_raw_json_response = self.proxy.send_and_get_response(state)
-            return FeedingIntent.deserialize(maybe_raw_json_response)
+            return maybe_raw_json_response
         except ConnectionResetError:
             raise ValueError
