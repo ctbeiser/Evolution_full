@@ -267,83 +267,14 @@ class PlayerTestCase(TestCase):
         self.assertEqual(Player._find_max_values([5, 7, 999, 8], lambda x: x), [999])
         self.assertEqual(Player._find_max_values([5, 7, 999, 8, 5], lambda x: 0-x), [5, 5])
 
-    @staticmethod
-    def generate_json_case(case_number, player, watering_hole, other_players, expected_result):
-        """ Generates a pair of json files called {case_number}-in.json and {case_number}-out.json
-        """
-        in_data = [player.serialize(), watering_hole, [p.serialize() for p in other_players]]
-        out_data = expected_result.serialize() if hasattr(expected_result, "serialize") else expected_result
+    def test_rehydrating_states(self):
+        player = Player(1, species=[self.species_car_0, self.species_car_1, self.species_car_2], bag=2,
+                        cards=[TraitCard(0, Trait.CARNIVORE)])
+        p = player.serialize()
+        p2 = Player(1)
 
-        directory = os.path.dirname(os.path.realpath(__file__))
-        test_directory = os.path.join(directory, "..", "test")
-        in_name = "{}-in.json".format(case_number)
-        out_name = "{}-out.json".format(case_number)
+        a, b = p2.rehydrate_from_state(player.produce_state(4, []))
 
-        in_path = os.path.join(test_directory, in_name)
-        out_path = os.path.join(test_directory, out_name)
-
-        with open(in_path, "w") as in_file:
-            json.dump(in_data, in_file, indent=5)
-            in_file.write("\n")
-        with open(out_path, "w") as out_file:
-            json.dump(out_data, out_file)
-            out_file.write("\n")
-
-    def generate_xfeed_cases(self):
-
-        enemy1 = Player(2, species=[self.species_veg_1, self.species_veg_0])
-
-        test_cases = [
-            # no species to feed
-            (
-                Player(1, species=[]),
-                1,
-                [Player(2, species=[self.species_easy_target]),
-                 Player(3, species=[self.species_easy_target])],
-                False
-            ),
-            # all species are fed
-            (
-                Player(1, species=[self.species_fed_veg, self.species_fed_fat, self.species_fed_car]),
-                1,
-                [Player(2, species=[self.species_easy_target]),
-                 Player(3, species=[self.species_easy_target])],
-                False
-            ),
-            # feed vegetarian
-            (
-                Player(1, species=[self.species_veg_0, self.species_fed_fat, self.species_fed_car]),
-                1,
-                [Player(2, species=[self.species_easy_target]),
-                 Player(3, species=[self.species_easy_target])],
-                FeedVegetarian(0),
-            ),
-            # feed fat tissue
-             (
-                Player(1, species=[self.species_veg_0, self.species_fat_1, self.species_fed_car]),
-                1,
-                [Player(2, species=[self.species_easy_target]),
-                 Player(3, species=[self.species_easy_target])],
-                StoreFat(1, self.species_fat_1.body - self.species_fat_1.fat_food),
-            ),
-            # feed carnivore
-            (
-                Player(1, species=[self.species_car_3, self.species_car_4, self.species_fed_car, self.species_fed_veg]),
-                4,
-                [
-                    enemy1,
-                    Player(4, species=[self.species_veg_3, self.species_defends]),
-                    Player(3, species=[self.species_veg_0, self.species_car_1]),
-                ],
-                FeedCarnivore(0, 0, enemy1.species.index(self.species_veg_1)),
-            ),
-        ]
-
-        for case_number, (player, watering_hole, other_players, expected) in enumerate(test_cases):
-            self.generate_json_case(case_number + 1, player, watering_hole, other_players, expected)
-
-
-if __name__ == "__main__":
-    ptc = PlayerTestCase()
-    ptc.setUp()
-    ptc.generate_xfeed_cases()
+        self.assertEqual(p2.serialize(), p)
+        self.assertEqual(a, 4)
+        self.assertEqual(len(b), len([]))
