@@ -1,16 +1,18 @@
 from .trait import Trait
 from .validate import *
+from .debug import *
 
 """
     Contains all feeding intents that can be returned by a Player as a
      response to a dealers's call to choose the next species to feed.
      Each intent implements a serialize method that generates a data
      representation for the intent according to the JSON data specification.
+     Note that the
 """
 
 
 class FeedingIntent:
-    """ Represents a feeding intent— this class should never be used directly. """
+    """ Represents a feeding intent— this class should never be used directly."""
 
     def serialize(self):
         """ Returns the appropriate data representation for the object
@@ -23,6 +25,7 @@ class FeedingIntent:
         """ Given a feeding intent as JSON, return the proper FeedingIntent
         :param data: a JSON representation of a FeedingIntent
         :return: a new FeedingIntent
+        Note: This method may throw a ValueError
         """
         if data is False:
             return FeedNone()
@@ -33,6 +36,8 @@ class FeedingIntent:
                 return StoreFat(*data)
             if len(data) == 3:
                 return FeedCarnivore(*data)
+        debug("Given an invalid feeding intent:")
+        debug(data)
         raise ValueError("This is not a valid Feeding Intent")
 
     def enact(self, player, others, dealer):
@@ -44,13 +49,14 @@ class FeedingIntent:
         pass
 
     def should_end_feeding(self):
-        """
+        """ Check whether this feeding intent indicates the player is done feeding
         :return: a Boolean indicating whether feeding should be ended for this Player
         """
         return False
 
     def is_valid(self, player, others, wh):
-        """ Check whether this feeding can be carried out given the state of the game
+        """ Check whether this feeding can be carried out given the state of the game.
+        Checks the invariants that are local to this combination of an intent and a player.
         :param player: Player that is feeding
         :param others: List of the other Players
         :param wh: the watering hole on which to check for validity
@@ -69,7 +75,6 @@ class CannotFeed(FeedingIntent):
 
 class FeedNone(FeedingIntent):
     """ Represents the intention to not feed any species. """
-
     def serialize(self):
         return False
 

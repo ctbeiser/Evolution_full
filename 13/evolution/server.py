@@ -1,12 +1,20 @@
 import socket
-from .dealer import MAX_PLAYERS
-from .streaming_json_coder import StreamingJSONCoder
-from .timeout import timeout
+from .dealer import MAX_PLAYERS, MIN_PLAYERS
+from .json_socket import JSONSocket
+from .timeout import *
 from .validate import *
+from .debug import debug
 
-
-class Server():
+class Server:
+    """
+    A Server holds a socket, allows players to connect, and conducts a handshake with them.
+    """
     def __init__(self, host, port):
+        """ Create a Server
+        :param host: a String representing a hostname for a socket
+        :param port: an Integer representing a port number.
+        Note: If the port is already in use, this function will exit(1)
+        """
         self.host = host
         self.port = port
 
@@ -14,17 +22,24 @@ class Server():
         self.connected_players = []
 
     def add_players(self):
-        while len(self.connected_players) < 3:
+        """ Connect players to the Server until 8 have connected or the timer runs out
+        :return: A list of players
+        """
+        while len(self.connected_players) < MIN_PLAYERS:
             try:
                 self.check_for_new_players()
-            except:
+            except TimedOutError:
                 pass
         self.add_to_8()
         return self.connected_players
 
     @timeout(5)
     def add_to_8(self):
-        while len(self.connected_players) < 8:
+        """
+        Add players to the server until 8 have connected or the timer runs out
+        :return:
+        """
+        while len(self.connected_players) < MAX_PLAYERS:
             try:
                 self.check_for_new_players()
             except:
@@ -41,7 +56,7 @@ class Server():
         return self.sock.accept()
 
     def add_new_player(self, sock):
-        player = StreamingJSONCoder(sock)
+        player = JSONSocket(sock)
         info = player.decode()
         if is_string(info):
             player.encode("ok")
@@ -50,7 +65,16 @@ class Server():
             player.shutdown()
 
     def initialize_socket(self):
+        """ Create a socket for listening for requests
+        :return: a Socket.socket object, bound to the host and port of this server.
+        Note: This function will exit(1) if the socket is in use.
+        """
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind((self.host, self.port))
+        try:
+            sock.bind((self.host, self.port))
+        except ConnectionResetError:
+            sock.close()
+            debug("Server: Socket is already in use")
+            exit(1)
         sock.listen(MAX_PLAYERS)
         return sock

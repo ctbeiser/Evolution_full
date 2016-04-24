@@ -7,6 +7,7 @@ from .feeding_intent import FeedNone, StoreFat, FeedVegetarian, FeedCarnivore, C
 from .traitcard import TraitCard
 from .action4 import Action4
 from .action import *
+from .debug import *
 
 DEFAULT_BAG_VALUE = 0
 BAG_JSON_NAME = "bag"
@@ -55,6 +56,11 @@ class Player:
         return serialized
 
     def produce_state(self, watering_hole, others):
+        """ Given a Watering Hole and a list of other players, serializes this Player to a State, as described in the spec
+        :param watering_hole: Integer
+        :param others: List of Player objects
+        :return: a Python-encoded JSON Array that encodes the structure of a State
+        """
         serialized = [self.bag,
                       [species.serialize() for species in self.species],
                       [card.serialize() for card in self.cards],
@@ -63,20 +69,31 @@ class Player:
         return serialized
 
     def rehydrate_from_state_without_others(self, data):
+        """ Sets the content of a Player to match that of JSON representing a State without associated watering hole or
+         list of players.
+        :param data: JSON representing a State without associated watering hole or list of players
+        Note: This method validates the JSON and ensures that it conforms to the specification.
+        If it does not conform, this method will raise a ValueError.
+        """
         if not is_list(data):
             raise ValueError(data)
         data.extend([0, []])
         self.rehydrate_from_state(data)
 
     def rehydrate_from_state(self, data):
+        """ Sets the content of a Player to match that of JSON representing a State
+        :param data: JSON representing a State
+        Note: This method validates the JSON and ensures that it conforms to the specification.
+        If it does not conform, this method will raise a ValueError.
+        """
         try:
-            if not(is_list(data) and
-            len(data) == 5 and
-            is_natural(data[0]) and
-            is_list(data[1]) and
-            is_list(data[2]) and
-            is_natural(data[3]) and
-            is_list(data[4])):
+            if not all([is_list(data),
+            len(data) == 5,
+            is_natural(data[0]),
+            is_list(data[1]),
+            is_list(data[2]),
+            is_natural(data[3]),
+            is_list(data[4])]):
                 raise ValueError()
         except:
             raise ValueError()
@@ -88,21 +105,47 @@ class Player:
         return (watering_hole, others)
 
     def serialize_species(self):
+        """ Serialize all species on this player
+        :return: python-encoded JSON Array representing a list of Species
+        """
         return [s.serialize() for s in self.species]
 
     @classmethod
     def deserialize_species(cls, data):
-        assert(is_list(data))
+        """ Deserializes a list of Players
+        :param data: python encoded JSON array of Players
+        :return: List of Player
+        Note: Given an invalid list, this method will raise a ValueError
+        """
+        if not(is_list(data)):
+            raise ValueError()
         return cls(0, species=[Species.deserialize(s) for s in data])
+
+    def rehydrate(self, data):
+        """ Sets the fields in this Player from the given JSON representation of one
+        :param data:
+        """
+        self.player_id, self.species, self.bag, self.cards = Player.get_params_from_json(data)
+
+    @classmethod
+    def deserialize(cls, data):
+        """ Given a serialized representation of the Player according to the evolution spec, produces a Player
+        :return: a Player
+        """
+        return cls(*list(Player.get_params_from_json(data)))
 
     @staticmethod
     def get_params_from_json(data):
+        """ Produces an ordered list of the parameters in a JSON Player
+        :param data: JSON representation of a Player
+        :return:
+        """
         parameters = {parameter: value for parameter, value in data}
 
-        assert 'id' in parameters
-        assert 'species' in parameters
+        if not 'id' in parameters and 'species' in parameters:
+            raise ValueError()
 
-        species = [Species.deserialize(species) for species in parameters['species']]
+        species = Player.deserialize_species(parameters['species'])
 
         cards = []
         if CARDS_JSON_NAME in parameters:
@@ -112,16 +155,6 @@ class Player:
             bag = parameters[BAG_JSON_NAME]
 
         return parameters['id'], species, bag, cards
-
-    def rehydrate(self, data):
-        self.player_id, self.species, self.bag, self.cards = Player.get_params_from_json(data)
-
-    @classmethod
-    def deserialize(cls, data):
-        """ Given a serialized representation of the Player according to the evolution spec, produces a Player
-        :return: a Player
-        """
-        return cls(*list(Player.get_params_from_json(data)))
 
     @staticmethod
     def _find_max_values(values, key):
@@ -205,6 +238,9 @@ class Player:
         return {"fat": fat_tissue, "carn": carnivores, "veg": vegetarians}
 
     def get_score(self):
+        """ Calculate a score for this player
+        :return: Integer representing a score
+        """
         score = self.bag
         for species in self.species:
             score += species.population
@@ -265,7 +301,8 @@ class InternalPlayer(Player):
                     return feeding
                 else:
                     raise ValueError()
-            except ValueError:
+            except ValueError as e:
+                debug_traceback(e.__traceback__)
                 return None
 
     def automatically_choose_species_to_feed(self, players):
@@ -291,11 +328,17 @@ class InternalPlayer(Player):
             return FeedVegetarian(self.species.index(hungry_veg[0]))
 
     def move_tokens_to_bag(self):
+        """ Move food tokens on the creatures into the player's bag.
+        :return:
+        """
         for s in self.species:
             self.bag += s.food
             s.food = 0
 
     def starve_creatures(self, kill_species):
+        """ Remove creatures with no food and move cards to this player's hand as appropriate.
+        :param kill_species: a function that takes this Player and the index of the creature to kill on this player.
+        """
         # don't remove creatures from the list while iterating!
         creatures_copy = [s for s in self.species]
         for creature in creatures_copy:
@@ -306,7 +349,7 @@ class InternalPlayer(Player):
 class ExternalPlayer(Player):
 
     def choose(self, before, after):
-        """ Implement the Silly Strategy for choosing cards
+        """ Implement the Silly Strategy for choosing cards, based on the current hand of the Player.
         :param before: players before this one in the list, as a List of JSON Players containing only public info
         :param after: players after this one in the list, as a List of JSON Players containing only public info
         :return: Action4 as JSON, representing choices made
@@ -331,9 +374,10 @@ class ExternalPlayer(Player):
         return actions.serialize()
 
     def feed_species(self, state):
-        """
+        """  Carrys out a single feeding according to the Silly Strategy
         :param state: a State
         :return: A JSON representation of the changed species
+        Note: Given an improper input, this function will raise a ValueError.
         """
         wh, players = self.rehydrate_from_state(state)
         return self.next_species_to_feed(players, wh).serialize()
@@ -423,27 +467,41 @@ class ExternalPlayer(Player):
 
 
 class ProxyPlayer:
+    """A Player that follows the interface for an External Player, but connects with an agent across a JSONSocket"""
 
-    def __init__(self, proxy):
+    def __init__(self, jsock):
         """ Creates a player that acts as an ExternalPlayer, by connecting to it remotely using a StreamingJsonCoder
-        :param proxy:
+        :param jsock:
         """
-        self.proxy = proxy
+        self.jsock = jsock
 
     def start(self, msg):
-        self.proxy.encode(msg)
+        """ Given a JSON message representing a message to start the game, send it to the remote player
+        :param msg: a JSON message
+        """
+        self.jsock.encode(msg)
 
     def choose(self, before, after):
+        """ Ask the remote player to choose the actions to take based on state and the players before and after
+        :param before: a list of Player as JSON
+        :param after: a list of Player as JSON
+        :return: a Action4 as JSON
+        Note: This message will raise a ValueError if the agent doesn't conform to the protocol.
+        """
         try:
-            maybe_raw_json_response = self.proxy.send_and_get_response([before, after])
-            return maybe_raw_json_response
+            json_response = self.jsock.send_and_get_response([before, after])
+            return json_response
         except ConnectionResetError:
             raise ValueError()
 
     def feed_species(self, state):
+        """ Ask the remote player to feed the species
+        :param state: A python-encoded JSON State
+        :return: a python-encoded FeedingIntent
+        Note: This message will raise a ValueError if the agent doesn't conform to the protocol.
+        """
         try:
-            maybe_raw_json_response = self.proxy.send_and_get_response(state)
+            maybe_raw_json_response = self.jsock.send_and_get_response(state)
             return maybe_raw_json_response
-
         except ConnectionResetError:
             raise ValueError()

@@ -98,6 +98,7 @@ class Species:
 
         :param data: a Species+ as JSON
         :return: Species object
+        This method will raise a ValueError given a bad Species
         """
         # Ensure the items are in order:
         if not all([is_list(data),

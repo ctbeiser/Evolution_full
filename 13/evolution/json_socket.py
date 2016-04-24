@@ -7,11 +7,11 @@ concatenated JSON stream and writes
 
 import json
 import socket
-from .dealer import MAX_PLAYERS
 from .timeout import *
+from .debug import debug
 
 
-class StreamingJSONCoder:
+class JSONSocket:
     """ Handles parsing of JSON objects from a concatenated JSON stream
     and writing JSON objects to the stream.
     """
@@ -22,22 +22,47 @@ class StreamingJSONCoder:
     class IncompleteBufferException(ValueError):
         """ Raised when the buffer doesn't contain a full valid JSON bytestring """
 
+    class ClosedSocketError(ValueError):
+        """ Raised when the socket has been closed"""
+
     def __init__(self, sock):
         """ Initializes the decoder.
-        :param host: stream host as a string
-        :param port: stream port as an integer
+        :param sock : A socket.socket object that is initialized and connected.
         """
         self.buffer = bytes()
         self.sock = sock
 
-    @timeout(3)
+    @classmethod
+    def from_host_and_port(cls, host, port):
+        """ Constructs a client JSONSocket from a host and a port number.
+        :param host: String representing a hostname
+        :param port: Integer representing a port number that can be connected to.
+        :return: a JSONSocket
+        Note: This method may find that the socket will not accept the connection. In that case, it will exit(1).
+        """
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock.connect((host, port))
+        except ConnectionRefusedError:
+            debug("The socket is in use")
+            sock.close()
+            exit(1)
+        return cls(sock)
+
+    @timeout(5)
     def decode(self):
+        """ Retrieve a single JSON message from the socket if one can be retrieved
+        This will not accept messages that take more than 3 seconds to arrive.
+        :return: a single python-encoded JSON message
+        Note: This method may throw a TimedOutError or a ClosedSocketError
+        """
         return self.decode_without_timeout()
 
     def decode_without_timeout(self):
         """ A method that produces a message from the player as JSON
         INVARIANT: There will be a maximum of one message waiting
-        :return:
+        :return: a python-encoded JSON message.
+        Note: this message may run forever if the socket gets disconnected.
         """
         while True:
             # read byte-sized chunks
@@ -45,6 +70,8 @@ class StreamingJSONCoder:
 
             if data:
                 self.buffer += data
+            else:
+                raise self.ClosedSocketError
             try:
                 parsed = self.parse_buffer()
                 return parsed
@@ -71,6 +98,11 @@ class StreamingJSONCoder:
         self.sock.sendall(encoded_data + b'\n')
 
     def send_and_get_response(self, data):
+        """ Encodes and sends the given object. Then, waits for a response to arrive.
+        :param data: JSON data to encode and send.
+        :return: JSON object
+        This method may raise a ValueError if the other end doesn't send exactly one message within the allotted time.
+        """
         self.encode(data)
         try:
             result = self.decode()
@@ -78,7 +110,11 @@ class StreamingJSONCoder:
             raise ValueError("No response arrived")
         # Ensure there's exactly one thing returned
         anything = self.sock.recv(self.BYTE_SIZE)
-        if (anything and anything != b'\n') or not result:
+        if (anything and anything != b'\n' and anything != b' ' and anything != b'\t'):
+            debug("Extra non-whitespace data was sent")
+            raise ValueError("Invalid response from Player")
+        if not result:
+            debug("No result was supplied by the program")
             raise ValueError("Invalid response from Player")
         return result
 
@@ -86,5 +122,4 @@ class StreamingJSONCoder:
         """ Closes the socket connection
         :return: None
         """
-        self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()

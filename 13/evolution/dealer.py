@@ -2,6 +2,7 @@ from .trait import Trait
 from .player import Player, InternalPlayer
 from .traitcard import TraitCard
 from .species import Species
+from .debug import debug
 
 DEAD_CREATURE_REPLACEMENT_CARDS = 2
 CARD_DRAW_COUNT = 3
@@ -52,9 +53,8 @@ class Dealer:
         return cls(players, wh, cards)
 
     def play_game(self, external_players):
-        """
+        """ Runs the game from the top level
         :param external_players: a list of ExternalPlayer objects
-        :return:
         """
         if not self.deck:
             self.deck = TraitCard.new_deck()
@@ -161,6 +161,7 @@ class Dealer:
         intent = first_player.feed_next(self.watering_hole, rest_players)
 
         if not intent:
+            debug("Removed player " + str(self.players.index(first_player)))
             self.players.remove(first_player)
             players_feeding.pop(0)
             return

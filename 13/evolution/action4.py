@@ -102,6 +102,10 @@ class Action4:
         return items
 
     def boards_in_bounds(self, player):
+        """ Given a player, check whether the Actions in this Action4 all only use boards it will have.
+        :param player: a Player object with cards in its hand
+        :return: Boolean indicating whether the boards are all in bounds
+        """
         indices = [p.board_used() for p in self.all_actions()]
         indices = [i for i in indices if i is not None]
         for indice in indices:
@@ -110,6 +114,10 @@ class Action4:
         return True
 
     def verify_trait_replacements(self, player):
+        """ Verify that all trait-replacements are legal
+        :param player: a Player object to verify the trait replacements
+        :return: a Boolean indicating whether the replacement is legal
+        """
         species = [s for s in player.species]
         species.extend(self.boards_with_traits)
         for t in self.trait_replacements:
