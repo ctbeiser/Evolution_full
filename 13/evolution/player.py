@@ -101,7 +101,7 @@ class Player:
         self.species = [Species.deserialize(species) for species in data[1]]
         self.cards = [TraitCard.deserialize(card) for card in data[2]]
         watering_hole = data[3]
-        others = [Species.deserialize(species) for slist in data[4] for species in slist]
+        others = [Player.deserialize_species(slist) for slist in data[4]]
         return (watering_hole, others)
 
     def serialize_species(self):
@@ -112,9 +112,9 @@ class Player:
 
     @classmethod
     def deserialize_species(cls, data):
-        """ Deserializes a list of Players
-        :param data: python encoded JSON array of Players
-        :return: List of Player
+        """ Deserializes a Player encoded as a list of Species
+        :param data: python encoded JSON array of Species
+        :return: Player
         Note: Given an invalid list, this method will raise a ValueError
         """
         if not(is_list(data)):
@@ -145,7 +145,7 @@ class Player:
         if not 'id' in parameters and 'species' in parameters:
             raise ValueError()
 
-        species = Player.deserialize_species(parameters['species'])
+        species = [Species.deserialize(p) for p in parameters['species']]
 
         cards = []
         if CARDS_JSON_NAME in parameters:

@@ -98,7 +98,7 @@ class FeedingIntentTestCase(TestCase):
 
     def test_enact_fat_tissue(self):
         for idx in range(0,3):
-            for tkns in range(0, 2):
+            for tkns in range(1, 2):
                 tissue = StoreFat(idx, tkns)
                 mock = Mock()
                 mock.feed_creature = Mock()
@@ -112,7 +112,7 @@ class FeedingIntentTestCase(TestCase):
 
     def test_serialize_fat_tissue(self):
         for x in range(2):
-            for y in range(2):
+            for y in range(1,2):
                     self.assertEqual(StoreFat(x, y).serialize(), [x, y])
 
     def test_cant_feed(self):
