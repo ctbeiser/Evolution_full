@@ -268,13 +268,24 @@ class PlayerTestCase(TestCase):
         self.assertEqual(Player._find_max_values([5, 7, 999, 8, 5], lambda x: 0-x), [5, 5])
 
     def test_rehydrating_states(self):
-        player = Player(1, species=[self.species_car_0, self.species_car_1, self.species_car_2], bag=2,
-                        cards=[TraitCard(0, Trait.CARNIVORE)])
-        p = player.serialize()
-        p2 = Player(1)
+        for player in [Player(1, species=[self.species_car_0, self.species_car_1, self.species_car_2], bag=2,
+                        cards=[TraitCard(0, Trait.CARNIVORE)]),
+                        Player(1, species=[], bag=2, cards=[TraitCard(0, Trait.CARNIVORE), TraitCard(1, Trait.CARNIVORE)]),
+                        Player(1, species=[], bag=0)]:
+            p = player.serialize()
+            p2 = Player(1)
 
-        a, b = p2.rehydrate_from_state(player.produce_state(4, []))
+            a, b = p2.rehydrate_from_state(player.produce_state(4, []))
 
-        self.assertEqual(p2.serialize(), p)
-        self.assertEqual(a, 4)
-        self.assertEqual(len(b), len([]))
+            self.assertEqual(p2.serialize(), p)
+            self.assertEqual(a, 4)
+            self.assertEqual(len(b), len([]))
+
+            p3 = Player(1)
+            p3.rehydrate(p)
+            self.assertEqual(p3.serialize(), p)
+
+            p4 = Player(1)
+            p4.rehydrate_from_state_without_others(player.produce_state(4, [])[:3])
+            self.assertEqual(p4.serialize(), p)
+
