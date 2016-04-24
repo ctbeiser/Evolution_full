@@ -22,7 +22,7 @@ class Server:
 
     def add_players(self):
         """ Connect players to the Server until at least the minimum have connected, and up to the maximum have
-        :return: A list of (JSONSockets mapping to each player.
+        :return: A list of (JSONSocket, String) representing the socket for a player and their handshake message
         """
         while len(self.connected_players) < MIN_PLAYERS:
             try:
@@ -68,7 +68,7 @@ class Server:
         info = player.decode()
         if is_string(info):
             player.encode("ok")
-            self.connected_players.append(player, info)
+            self.connected_players.append((player, info))
         else:
             player.shutdown()
 

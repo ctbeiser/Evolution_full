@@ -54,13 +54,13 @@ class Dealer:
 
     def play_game(self, external_players):
         """ Runs the game from the top level
-        :param external_players: a list of ExternalPlayer objects
+        :param external_players: a List of (ExternalPlayer object, String) representing a player & its handshake
         """
         if not self.deck:
             self.deck = TraitCard.new_deck()
             self.deck.sort()
-        for i, player in enumerate(external_players, start=1):
-            self.players.append(InternalPlayer(i, player))
+        for i, (player, string) in enumerate(external_players, start=1):
+            self.players.append(InternalPlayer(i, player, handshake=string))
 
         while not self.game_over():
             self.step_one()
@@ -227,11 +227,11 @@ class Dealer:
 
     def get_scores(self):
         """ Get all the scores for this game, in sorted order.
-        :return: a List(Integer, Integer), representing score and player ID respectively.
+        :return: a List(Integer, Integer, String), representing score, player ID, and Handshake respectively.
         """
         results = []
         for player in self.players:
-            player_score = player.get_score(), player.player_id
-            results.append(player_score)
+            player_details = player.get_score(), player.player_id, player.handshake
+            results.append(player_details)
         results.sort(reverse=True)
         return results

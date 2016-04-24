@@ -250,12 +250,13 @@ class Player:
 
 class InternalPlayer(Player):
 
-    def __init__(self, player_id, external_player):
+    def __init__(self, player_id, external_player, handshake=""):
         """
         :param player_id: Integer representing the ID for this player
         :param external_player: an ExternalPlayer to act as an agent for this player.
         """
         self.player_agent = external_player
+        self.handshake = handshake
         super().__init__(player_id)
 
     def add_cards(self, board, cards):
