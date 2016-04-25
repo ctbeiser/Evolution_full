@@ -51,6 +51,7 @@ class TraitCard:
         :param data: A list of [foodValue, name] where the former is between
         -8 and 8, and the latter is a serialized trait
         :return: a new TraitCard
+        May raise a ValueError given improper inputs
         """
         food_value, name = data
         return cls(food_value, Trait(name))

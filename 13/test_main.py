@@ -1,6 +1,7 @@
 from main import generate_score_string
 from unittest import TestCase
 
+
 class MainTestCase(TestCase):
 
     def test_generating_score(self):

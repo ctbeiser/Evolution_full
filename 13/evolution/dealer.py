@@ -82,7 +82,7 @@ class Dealer:
             species_count = len(player.species)
             board = Species() if not species_count else None
             cards = [self.deck.pop() for _ in range(CARD_DRAW_COUNT + max(1, species_count))]
-            player.add_cards(board, cards)
+            player.start(board, cards, self.watering_hole)
 
     def step_two_and_three(self):
         """ Carries out steps 2 and 3 of the evolution game, and returns the actions.

@@ -55,30 +55,61 @@ class Player:
             serialized.append([CARDS_JSON_NAME, [card.serialize() for card in self.cards]])
         return serialized
 
-    def produce_state(self, watering_hole, others):
+    def produce_state(self, watering_hole, others=None):
         """ Given a Watering Hole and a list of other players, serializes this Player to a State, as described in the spec
+        If others is passed, this will produce a list of 5, starting with the species.
+        If others is not passed, it will produce a list of length 4, with the watering hole moved to the front.
         :param watering_hole: Integer
-        :param others: List of Player objects
+        :param others: List of Player objects, or None
         :return: a Python-encoded JSON Array that encodes the structure of a State
         """
         serialized = [self.bag,
                       [species.serialize() for species in self.species],
-                      [card.serialize() for card in self.cards],
-                      watering_hole,
-                      [p.serialize_species() for p in others]]
+                      [card.serialize() for card in self.cards]]
+        if others:
+            serialized.append(watering_hole)
+            serialized.append([p.serialize_species() for p in others])
+        else:
+            serialized.insert(0, watering_hole)
         return serialized
 
     def rehydrate_from_state_without_others(self, data):
-        """ Sets the content of a Player to match that of JSON representing a State without associated watering hole or
-         list of players.
-        :param data: JSON representing a State without associated watering hole or list of players
+        """ Sets the content of a Player to match that of JSON representing a State without an associated list of players.
+        :param data: JSON representing a State without an associated list of players
+        :return Integer representing the watering hole
         Note: This method validates the JSON and ensures that it conforms to the specification.
         If it does not conform, this method will raise a ValueError.
         """
-        if not is_list(data):
-            raise ValueError(data)
-        data.extend([0, []])
-        self.rehydrate_from_state(data)
+        try:
+            if not all([is_list(data),
+                        len(data) == 4,
+                        is_natural(data[0])]):
+                raise ValueError()
+        except:
+            raise ValueError()
+
+        self.rehydrate_from_state(data[1:])
+        return data[0]
+
+    def rehydrate_from_state_with_others(self, data):
+        """ Sets the content of a Player to match that of JSON representing a State without an associated list of players.
+        :param data: JSON representing a State without an associated list of players
+        :return Integer representing the watering hole
+        Note: This method validates the JSON and ensures that it conforms to the specification.
+        If it does not conform, this method will raise a ValueError.
+        """
+        try:
+            if not all([is_list(data),
+                        len(data) == 5,
+                        is_natural(data[3]),
+                        is_list(data[4])]):
+                raise ValueError()
+        except:
+            raise ValueError()
+        self.rehydrate_from_state(data[:3])
+        watering_hole = data[3]
+        others = [Player.deserialize_species(slist) for slist in data[4]]
+        return watering_hole, others
 
     def rehydrate_from_state(self, data):
         """ Sets the content of a Player to match that of JSON representing a State
@@ -88,21 +119,27 @@ class Player:
         """
         try:
             if not all([is_list(data),
-            len(data) == 5,
+            len(data) == 3,
             is_natural(data[0]),
             is_list(data[1]),
-            is_list(data[2]),
-            is_natural(data[3]),
-            is_list(data[4])]):
+            is_list(data[2])]):
                 raise ValueError()
-        except:
+        except ValueError:
             raise ValueError()
         self.bag = data[0]
-        self.species = [Species.deserialize(species) for species in data[1]]
-        self.cards = [TraitCard.deserialize(card) for card in data[2]]
-        watering_hole = data[3]
-        others = [Player.deserialize_species(slist) for slist in data[4]]
-        return (watering_hole, others)
+        try:
+            self.species = [Species.deserialize(species) for species in data[1]]
+            self.cards = [TraitCard.deserialize(card) for card in data[2]]
+        except:
+            raise ValueError()
+
+    def rehydrate(self, species=None, bag=None, cards=None):
+        if species:
+            self.species = species
+        if bag:
+            self.bag = bag
+        if cards:
+            self.cards = cards
 
     def serialize_species(self):
         """ Serialize all species on this player
@@ -259,15 +296,16 @@ class InternalPlayer(Player):
         self.handshake = handshake
         super().__init__(player_id)
 
-    def add_cards(self, board, cards):
+    def start(self, board, cards, watering_hole):
         """ Add cards and optionally a Species to this player, update the state of the external player.
         :param board: A Species or None
         :param cards: A List of TraitCard
+        :param watering_hole: an Integer representing the Watering Hole
         """
         self.cards.extend(cards)
         if board:
             self.species.append(board)
-        self.player_agent.start(self.produce_state(0, [])[:3])
+        self.player_agent.start(self.produce_state(watering_hole))
 
     def request_actions(self, players):
         """ Request an Action4 for this turn from the ExternalPlayer
@@ -374,13 +412,16 @@ class ExternalPlayer(Player):
         actions = Action4(foodcard, popup, bodyup, board_actions, replace)
         return actions.serialize()
 
+    def start(self, msg):
+        self.rehydrate_from_state_without_others(msg)
+
     def feed_species(self, state):
         """  Carrys out a single feeding according to the Silly Strategy
         :param state: a State
         :return: A JSON representation of the changed species
         Note: Given an improper input, this function will raise a ValueError.
         """
-        wh, players = self.rehydrate_from_state(state)
+        wh, players = self.rehydrate_from_state_with_others(state)
         return self.next_species_to_feed(players, wh).serialize()
 
     def next_species_to_feed(self, players, watering_hole):

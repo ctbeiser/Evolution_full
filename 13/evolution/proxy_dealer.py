@@ -3,6 +3,7 @@ from .validate import *
 from .player import ExternalPlayer
 from .timeout import *
 from .debug import debug
+from .json_socket import JSONSocket
 
 class ProxyDealer:
     """ Implements a finite state machine of the messages acceptable by the Player, and sends responses from
@@ -21,18 +22,24 @@ class ProxyDealer:
         """ the main loop of the Dealer. Wait for, process, and respond to messages from the
         :return:
         """
-        self.wait_for_ok()
-        self.update_for_start()
-        while True:
-            self.wait_for_choice_request()
-            self.wait_for_feed_species_and_restart()
+        try:
+            self.wait_for_ok()
+            self.update_for_start()
+            while True:
+                self.wait_for_choice_request()
+                self.wait_for_feed_species_and_restart()
+        except JSONSocket.ClosedSocketError:
+            self.coder.shutdown()
+            debug("The port has shut down")
+            exit(1)
 
 
     def wait_for_ok(self):
         result = self.coder.decode_without_timeout()
         if not result == "ok":
             debug("We've received something other than an 'ok' in the handshake.")
-            raise ValueError()
+            self.coder.shutdown()
+            exit(1)
 
 
     def update_for_start(self):
@@ -41,8 +48,8 @@ class ProxyDealer:
         """
         try:
             result = self.coder.decode_without_timeout()
-            self.player.rehydrate_from_state_without_others(result)
-        except:
+            self.player.start(result)
+        except ValueError:
             debug("Updating for the start of the round has failed")
             self.coder.shutdown()
             exit(1)
@@ -52,7 +59,7 @@ class ProxyDealer:
             request = self.coder.decode_without_timeout()
             response = self.player.choose(request[0], request[1])
             self.coder.encode(response)
-        except:
+        except ValueError:
             debug("Choosing cards has failed")
             self.coder.shutdown()
             exit(1)
@@ -61,12 +68,12 @@ class ProxyDealer:
         try:
             while True:
                 request = self.coder.decode_without_timeout()
-                if len(request) == 3:
-                    self.player.rehydrate_from_state_without_others(request)
+                if len(request) == 4:
+                    self.player.start(request)
                     return
                 else:
                     self.coder.encode(self.player.feed_species(request))
-        except:
+        except ValueError:
             debug("Feeding has failed")
             self.coder.shutdown()
             exit(1)

@@ -84,7 +84,7 @@ class Server:
             # It is necessary to pass this function a Tuple of (Host, Port) because the API authors thought that
             # it was more important to mirror over how this was done in C than make something sane
             sock.bind((host, port))
-        except ConnectionResetError:
+        except (ConnectionResetError, OSError):
             sock.close()
             debug("Server: Socket is already in use")
             exit(1)

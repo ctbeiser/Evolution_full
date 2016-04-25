@@ -3,6 +3,7 @@ import sys
 from evolution.dealer import Dealer, MIN_PLAYERS
 from evolution.player import *
 from evolution.server import Server
+from evolution.debug import debug
 
 def generate_score_string(scores):
     """ Print out the scores for the end of the game
@@ -18,6 +19,8 @@ def generate_score_string(scores):
     return result
 
 def main():
+    """ Carry out the game and print results to stdout
+    """
     server = Server("localhost", 45678)
     remote_players_and_messages = server.add_players()
 
@@ -26,7 +29,8 @@ def main():
     dealer.play_game(proxies)
 
     scores = dealer.get_scores()
-
+    if not scores:
+        debug("Every player dropped and the game ended")
     sys.stdout.write(generate_score_string(scores))
 
 if __name__ == '__main__':
