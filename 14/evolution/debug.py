@@ -1,6 +1,6 @@
 import traceback
 
-DEBUG = True
+DEBUG = False
 
 def debug(string):
     """ Prints an object to the command line if debugging is enabled.

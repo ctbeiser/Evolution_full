@@ -33,7 +33,7 @@ class Action:
 class UpAction(Action):
     def __init__(self, board, card):
         """
-        :param board: Integer representing the index of the Board to grow population of
+        :param board: Integer representing the index of the Board to grow X of
         :param card: Integer representing the index of the Card to exchange to grow
         :return: A new *UpAction
         """
@@ -57,12 +57,12 @@ class UpAction(Action):
         :return: A new *UpAction
         """
         if not all([is_list(json),
-                    len(json) == 3,
-                    is_natural(json[1]),
-                    is_natural(json[2])]):
+                    len(json) == 2,
+                    is_natural(json[0]),
+                    is_natural(json[1])]):
             raise ValueError("This UpAction is not legitimate")
-        board = json[1]
-        card = json[2]
+        board = json[0]
+        card = json[1]
         return cls(board, card)
 
 
@@ -72,12 +72,6 @@ class PopulationUpAction(UpAction):
     """
     Represents an 'increase population' Action
     """
-    @classmethod
-    def deserialize(cls, json):
-        if not json[0] == "population":
-            raise ValueError("This PopulationUpAction doesn't start with the word `population`")
-        return super(PopulationUpAction, cls).deserialize(json)
-
     def enact(self, player):
         """
         :param player: The player whose population should be increased.
@@ -89,19 +83,13 @@ class PopulationUpAction(UpAction):
         """
         :return: A python Array representing this action as JSON
         """
-        return ["population", self.board, self.card]
+        return [self.board, self.card]
 
 
 class BodyUpAction(UpAction):
     """
     Represents an 'increase body size' action
     """
-
-    @classmethod
-    def deserialize(cls, json):
-        if not json[0] == "body":
-            raise ValueError("This BodyUpAction doesn't start with the word `body`")
-        return super(BodyUpAction, cls).deserialize(json)
 
     def enact(self, player):
         creature = player.species[self.board]
@@ -111,7 +99,7 @@ class BodyUpAction(UpAction):
         """
         :return: A python Array representing this action as JSON
         """
-        return ["body", self.board, self.card]
+        return [self.board, self.card]
 
 
 class NewBoardAction(Action):

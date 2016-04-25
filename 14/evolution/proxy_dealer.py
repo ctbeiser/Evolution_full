@@ -19,8 +19,8 @@ class ProxyDealer:
         self.coder.encode(greeting)
 
     def begin(self):
-        """ the main loop of the Dealer. Wait for, process, and respond to messages from the
-        :return:
+        """ the main loop of the Dealer. Wait for, process, and respond to messages from the client
+        Note: This function is crash-only; it will not return.
         """
         try:
             self.wait_for_ok()
@@ -35,6 +35,8 @@ class ProxyDealer:
 
 
     def wait_for_ok(self):
+        """ Verify the handshake from the dealer. If it isn't 'ok', quit the application.
+        """
         result = self.coder.decode_without_timeout()
         if not result == "ok":
             debug("We've received something other than an 'ok' in the handshake.")
@@ -43,8 +45,8 @@ class ProxyDealer:
 
 
     def update_for_start(self):
-        """
-        :return:
+        """ Represents the state of the DFA for the dealer where it must send a start-round message,
+        translates that to the player agent.
         """
         try:
             result = self.coder.decode_without_timeout()
@@ -55,6 +57,9 @@ class ProxyDealer:
             exit(1)
 
     def wait_for_choice_request(self):
+        """ Represents the state of the DFA for the dealer where it must receive a 'choose-feeding-intent' message,
+            translates that to the player agent.
+        """
         try:
             request = self.coder.decode_without_timeout()
             response = self.player.choose(request[0], request[1])
@@ -65,6 +70,9 @@ class ProxyDealer:
             exit(1)
 
     def wait_for_feed_species_and_restart(self):
+        """ Represents the state of the DFA for the dealer where it may receive a feeding message, but it may also
+            receive a new-round message, and translates that to the plaer agent.
+        """
         try:
             while True:
                 request = self.coder.decode_without_timeout()

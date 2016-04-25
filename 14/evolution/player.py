@@ -413,6 +413,9 @@ class ExternalPlayer(Player):
         return actions.serialize()
 
     def start(self, msg):
+        """ Given a JSON message representing a message to start the game, update internal state
+            :param msg: a JSON message with a State without others, as described in the spec
+        """
         self.rehydrate_from_state_without_others(msg)
 
     def feed_species(self, state):
