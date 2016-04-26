@@ -52,7 +52,7 @@ class Player:
         serialized = [self.bag,
                       [species.serialize() for species in self.species],
                       [card.serialize() for card in self.cards]]
-        if others:
+        if others is not None:
             serialized.append(watering_hole)
             serialized.append([p.serialize_species() for p in others])
         else:

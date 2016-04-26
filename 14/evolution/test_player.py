@@ -275,17 +275,18 @@ class PlayerTestCase(TestCase):
             p = player.serialize()
             p2 = Player(1)
 
-            a, b = p2.rehydrate_from_state(player.produce_state(4, []))
+            for o in [[], [player]]:
+                a, b = p2.rehydrate_from_state_with_others(player.produce_state(4, others=o))
 
-            self.assertEqual(p2.serialize(), p)
-            self.assertEqual(a, 4)
-            self.assertEqual(len(b), len([]))
+                self.assertEqual(p2.serialize(), p)
+                self.assertEqual(a, 4)
+                self.assertEqual(len(b), len(o))
 
             p3 = Player(1)
             p3.rehydrate(p)
             self.assertEqual(p3.serialize(), p)
 
             p4 = Player(1)
-            p4.rehydrate_from_state_without_others(player.produce_state(4, [])[:3])
+            p4.rehydrate_from_state_without_others(player.produce_state(4))
             self.assertEqual(p4.serialize(), p)
 
