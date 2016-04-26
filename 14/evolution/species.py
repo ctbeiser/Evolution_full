@@ -5,6 +5,8 @@ Represents a Species in the Evolution game.
 """
 from .trait import Trait, HARD_SHELL_THRESHOLD
 from .validate import *
+from .debug import debug
+import inspect
 
 SPECIES_DEFAULT_FOOD = 0
 SPECIES_DEFAULT_BODY = 0
@@ -50,6 +52,8 @@ class Species:
         """ Set the population of this species, decreasing food if necessary
         :param value: Integer
         """
+        debug("setting population to " + str(value), verbose=True)
+        debug(inspect.stack()[1][3], verbose=True)
         value = min(value, SPECIES_MAX_POPULATION)
         # TODO :  Add killing the creature to here... somehow.
         self._population = value

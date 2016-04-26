@@ -12,6 +12,7 @@ def debug(string, player_id=None, verbose=False):
     :player_id: Player's id, if debug is called from a player
     """
     if verbose:
+        print(string)
         if not VERBOSE:
             return
     if DEBUG:

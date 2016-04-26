@@ -46,7 +46,6 @@ class Dealer:
         """
         if not self.deck:
             self.deck = TraitCard.new_deck()
-            self.deck.sort()
         for i, (player, string) in enumerate(external_players, start=1):
             self.players.append(InternalPlayer(i, player, handshake=string))
 
@@ -59,8 +58,11 @@ class Dealer:
         """ Should the game stop?
         :return: Boolean
         """
+        cards_needed = sum([CARD_DRAW_COUNT + max(1, len(player.species)) for player in self.players])
+        debug("Cards needed: " + str(cards_needed) + "Available: " + str(len(self.deck)), verbose=True)
+
         return (not self.players) or \
-            sum([CARD_DRAW_COUNT + max(1, len(player.species)) for player in self.players]) > len(self.deck)
+            cards_needed > len(self.deck)
 
     def step_one(self):
         """
@@ -69,7 +71,7 @@ class Dealer:
         for player in self.players:
             species_count = len(player.species)
             board = Species() if not species_count else None
-            cards = [self.deck.pop() for _ in range(CARD_DRAW_COUNT + max(1, species_count))]
+            cards = [self.deck.pop(0) for _ in range(CARD_DRAW_COUNT + max(1, species_count))]
             player.start(board, cards, self.watering_hole)
 
     def step_two_and_three(self):
@@ -104,6 +106,7 @@ class Dealer:
             watering_hole_cards.append(food_card.food_value)
         for card in watering_hole_cards:
             self.watering_hole = max(0, self.watering_hole + card)
+        debug("Watering hole is "+ str(self.watering_hole), verbose=True)
 
     def autofeed(self):
         """ Carries out adding population for Fertile, feeding for long_neck, and transferring fat tissue

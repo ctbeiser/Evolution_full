@@ -121,3 +121,4 @@ class DealerTestCase(TestCase):
 
         self.assertEqual(self.dealer1.watering_hole, 10-BIG_SIZE)
         self.assertEqual(fat_species.fat_food, BIG_SIZE)
+

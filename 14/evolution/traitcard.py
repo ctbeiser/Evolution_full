@@ -60,5 +60,5 @@ class TraitCard:
                 food_range = CARNIVORE_FOOD_VALUE_RANGE
             for i in food_range:
                 deck.append(TraitCard(i, t))
-        assert(len(deck) == 122)
+        deck.sort()
         return deck
