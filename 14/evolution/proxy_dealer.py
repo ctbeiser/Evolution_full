@@ -17,6 +17,10 @@ class ProxyDealer:
         self.player = player or ExternalPlayer(0)
         self.coder = coder
         self.coder.encode(handshake)
+        try:
+            self.__player_id__ = int(handshake)
+        except:
+            self.__player_id__ = 1
 
     def begin(self):
         """ the main loop of the Dealer. Wait for, process, and respond to messages from the client
@@ -30,7 +34,7 @@ class ProxyDealer:
                 self.wait_for_feed_species_and_restart()
         except JSONSocket.ClosedSocketError:
             self.coder.shutdown()
-            debug("The port has shut down")
+            debug("The port has shut down", player_id=self.__player_id__)
             exit(1)
 
 
@@ -39,7 +43,7 @@ class ProxyDealer:
         """
         result = self.coder.decode_without_timeout()
         if not result == "ok":
-            debug("We've received something other than an 'ok' in the handshake.")
+            debug("We've received something other than an 'ok' in the handshake.", player_id=self.__player_id__)
             self.coder.shutdown()
             exit(1)
 
@@ -52,7 +56,7 @@ class ProxyDealer:
             result = self.coder.decode_without_timeout()
             self.player.start(result)
         except ValueError:
-            debug("Updating for the start of the round has failed")
+            debug("Updating for the start of the round has failed", player_id=self.__player_id__)
             self.coder.shutdown()
             exit(1)
 
@@ -65,7 +69,7 @@ class ProxyDealer:
             response = self.player.choose(request[0], request[1])
             self.coder.encode(response)
         except ValueError:
-            debug("Choosing cards has failed")
+            debug("Choosing cards has failed", player_id=self.__player_id__)
             self.coder.shutdown()
             exit(1)
 
@@ -82,6 +86,6 @@ class ProxyDealer:
                 else:
                     self.coder.encode(self.player.feed_species(request))
         except ValueError:
-            debug("Feeding has failed")
+            debug("Feeding has failed", player_id=self.__player_id__)
             self.coder.shutdown()
             exit(1)

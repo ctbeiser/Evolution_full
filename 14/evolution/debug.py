@@ -2,17 +2,18 @@ import traceback
 
 
 #Integer between 0 (None) and 2 (All). 1 will print only those with the circumstance flag
-DEBUG_LEVEL = 0
+DEBUG = False
 
 
-def debug(string, circumstance=False):
+def debug(string, player_id=None):
     """ Prints an object to the command line if debugging is enabled.
     Use instead of print because this may be expanded in the future to use debugging facilities properly.
     :param str: String
     :circumstance: Override to print debug statements
     """
-    if DEBUG_LEVEL + circumstance >= 2:
-        print(string)
+    if DEBUG:
+        if player_id == 0:
+            print(string)
 
 
 def debug_traceback(tb):
