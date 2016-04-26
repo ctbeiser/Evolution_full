@@ -4,6 +4,7 @@ from evolution.dealer import Dealer, MIN_PLAYERS
 from evolution.player import *
 from evolution.server import Server
 from evolution.debug import debug
+from evolution.proxy_player import ProxyPlayer
 
 def generate_score_string(scores):
     """ Print out the scores for the end of the game
