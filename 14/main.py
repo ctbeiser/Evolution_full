@@ -19,10 +19,11 @@ def generate_score_string(scores):
         result += out_string
     return result
 
-def main():
+def main(port=45678):
     """ Carry out the game and print results to stdout
+    :param port: Integer representing the port to play on
     """
-    server = Server("localhost", 45678)
+    server = Server("localhost", port)
     remote_players_and_messages = server.add_players()
 
     dealer = Dealer()
@@ -35,4 +36,5 @@ def main():
     sys.stdout.write(generate_score_string(scores))
 
 if __name__ == '__main__':
-    main()
+    port = int(sys.argv[1])
+    main(port)
