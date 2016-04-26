@@ -44,7 +44,8 @@ class FeedingIntent:
         """ Modifies players to carry out this feeding
         :param player: Player that is feeding
         :param others: List of the other Players
-        :param dealer: the Dealer with which to carry out the necessary changes
+        :param dealer: the Dealer with which to carry out the necessary changes. This method takes a Dealer, as
+        described in DEALER_SPEC.txt
         """
         pass
 

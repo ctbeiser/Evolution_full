@@ -54,7 +54,8 @@ class Dealer:
 
     def play_game(self, external_players):
         """ Runs the game from the top level
-        :param external_players: a List of (ExternalPlayer object, String) representing a player & its handshake
+        :param external_players: a List of (ExternalPlayer object, String) representing a player & its handshake, where
+        an ExternalPlayer object is described in EXTERNAL_PLAYER_SPEC.md
         """
         if not self.deck:
             self.deck = TraitCard.new_deck()

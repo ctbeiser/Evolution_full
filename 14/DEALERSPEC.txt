@@ -1,0 +1,14 @@
+DEALERSPEC:
+
+Has methods:
+kill_creature(player, index of species)
+	-Player object
+	-Integer representing index in the Player’s list of species
+feed_creature(player, index of species, scavenge=True)
+	-Player object
+	-Integer representing index in the Player’s list of species
+	-Boolean of whether to scavenge
+fat_feed(player, species index, number of tokens)
+	-Player
+	-Integer of species on that Player
+	-Integer > 0, representing number of tokens to move 

@@ -1,0 +1,17 @@
+EXTERNAL_PLAYER
+start(msg)
+Given a JSON message to start the game, send it to the remote player
+	msg: a JSON message in the altered version of a State described in the spec.
+
+choose(before, after)
+Asks the remote player to choose the actions to take based on state and the players before and after
+        before: a list of Player as JSON
+        after: a list of Player as JSON
+        returns a Action4 as JSON
+     This message will raise a ValueError if the agent doesn't conform to the protocol.
+
+feed_species(state)
+Ask the player to feed a species
+     state: A python-encoded JSON State
+     returns a python-encoded FeedingIntent
+     This method should raise a ValueError if the agent doesn't conform to the protocol.
