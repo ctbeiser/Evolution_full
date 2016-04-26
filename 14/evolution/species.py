@@ -47,16 +47,27 @@ class Species:
 
     @population.setter
     def population(self, value):
+        """ Set the population of this species, decreasing food if necessary
+        :param value: Integer
+        """
         value = min(value, SPECIES_MAX_POPULATION)
         # TODO :  Add killing the creature to here... somehow.
         self._population = value
         self.food = min(self.food, self._population)
 
     def replace_trait_at_index(self, idx, trait):
+        """ Replace the trait at the given index, and verify that this poses no issues.
+        (The responsibility for doing so actually lies outside this method...)
+        TODO: Verify that this check can safely be removed from right here.
+        :param idx: Integer position of the trait to replace
+        :param trait: Trait
+        """
         self.traits[idx] = trait
         self.verify_traits()
 
     def verify_traits(self):
+        """ Check that this species doesn't violate any invariants on Traits. If it does, raise a ValueError
+        """
         if not self.has_trait(Trait.FAT_TISSUE):
             self.fat_food = 0
         if not all([(not(any(self.traits.count(x) > 1 for x in self.traits))),
@@ -171,4 +182,7 @@ class Species:
         return self.food < self.population
 
     def trait_count(self):
+        """ Get the number of traits on this species.
+        :return: Integer
+        """
         return len(self.traits)
