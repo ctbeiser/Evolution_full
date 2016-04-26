@@ -60,7 +60,7 @@ class Dealer:
         :return: Boolean
         """
         return (not self.players) or \
-            sum([CARD_DRAW_COUNT + len(player.species) for player in self.players]) > len(self.deck)
+            sum([CARD_DRAW_COUNT + max(1, len(player.species)) for player in self.players]) > len(self.deck)
 
     def step_one(self):
         """
@@ -133,9 +133,15 @@ class Dealer:
         while (ordered_players and self.watering_hole):
             self.feed_one(ordered_players)
 
+        if ordered_players:
+            debug("We ran out of food", verbose=True)
+        else:
+            debug("We ran out of players", verbose=True)
+
         if self.players:
             # the extra complexity here is necessary in the case we remove players: don't want to lose our spot.
             self.starting_player = (len([player for player in before if player in self.players])-1 + 1) % len(self.players)
+            debug(str(self.starting_player) + "is the new starting player", verbose=True)
         for player in self.players:
             player.starve_creatures(self.kill_creature)
             player.move_tokens_to_bag()

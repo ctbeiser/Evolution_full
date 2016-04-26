@@ -361,6 +361,7 @@ class InternalPlayer(Player):
         for s in self.species:
             self.bag += s.food
             s.food = 0
+        debug("Score is " + str(self.bag) + " for player " + self.handshake, verbose=True)
 
     def starve_creatures(self, kill_species):
         """ Remove creatures with no food and move cards to this player's hand as appropriate.
