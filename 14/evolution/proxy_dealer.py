@@ -8,15 +8,15 @@ from .json_socket import JSONSocket
 class ProxyDealer:
     """ Implements a finite state machine of the messages acceptable by the Player, and sends responses from
         an ExternalPlayer"""
-    def __init__(self, coder, player=None, greeting="Hello"):
+    def __init__(self, coder, player=None, handshake="Hello"):
         """ Creates a ProxyDealer, and sends an initial handshake to it.
         :param coder: a JSONSocket connected to a server
         :param player: Optionally, a class to use as a player agent. If none is found,
-        :param greeting: a String to send as a handshake to the Server
+        :param handshake: a String to send as a handshake to the Server
         """
         self.player = player or ExternalPlayer(0)
         self.coder = coder
-        self.coder.encode(greeting)
+        self.coder.encode(handshake)
 
     def begin(self):
         """ the main loop of the Dealer. Wait for, process, and respond to messages from the client
