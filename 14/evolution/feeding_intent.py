@@ -3,11 +3,10 @@ from .validate import *
 from .debug import *
 
 """
-    Contains all feeding intents that can be returned by a Player as a
+     Contains all feeding intents that can be returned by a Player as a
      response to a dealers's call to choose the next species to feed.
      Each intent implements a serialize method that generates a data
-     representation for the intent according to the JSON data specification.
-     Note that the
+     representation for the intent according to the JSON data specification
 """
 
 
@@ -65,6 +64,14 @@ class FeedingIntent:
         """
         return True
 
+    def unrotate(self, by, modulo):
+        """ Rotate the player referred to by 'by', modulo 'modulo'
+        This is used to translate from what we receive from the player back to referring to the player.
+        :param by: Natural
+        :param modulo: Natural+
+        """
+        pass
+
 class CannotFeed(FeedingIntent):
     """ Represents the inability to feed any species. """
 
@@ -98,6 +105,8 @@ class FeedSpecies(FeedingIntent):
     def is_valid(self, player, others, wh):
         return self.species_index in range(len(player.species))
 
+    def unrotate(self, by, modulo):
+        pass
 
 class StoreFat(FeedSpecies):
     """ Represents the intention to store the given number of food tokens
@@ -124,12 +133,12 @@ class StoreFat(FeedSpecies):
                    species.fat_food + self.tokens <= species.body])
 
 
+
 class FeedVegetarian(FeedSpecies):
     """ Represents the intention to feed the vegetarian species at the given
      index in the Player's species list """
     def enact(self, player, others, dealer):
         dealer.feed_creature(player, self.species_index)
-
 
 class FeedCarnivore(FeedSpecies):
     """ Represents the intention to feed the carnivore at the given index by
@@ -163,3 +172,6 @@ class FeedCarnivore(FeedSpecies):
         return super(FeedCarnivore, self).is_valid(player, others, wh) \
             and self.defending_player_index in range(len(others)) \
             and self.defender_index in range(len(others[self.defending_player_index].species))
+
+    def unrotate(self, by, modulo):
+        self.defending_player_index = (self.defending_player_index + by) % modulo

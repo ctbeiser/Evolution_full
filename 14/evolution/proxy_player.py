@@ -7,8 +7,6 @@ class ProxyPlayer:
         """
         self.jsock = jsock
 
-    # The following three method's signatures represent the
-
     def start(self, msg):
         """ Given a JSON message representing a message to start the game, send it to the remote player
         :param msg: a JSON message

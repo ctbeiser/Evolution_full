@@ -145,8 +145,8 @@ class Dealer:
         :param players_feeding: List of Players, with first to feed at the front
         """
         first_player = players_feeding[0]
-        rest_players = [p for p in self.players if p is not first_player]
-        intent = first_player.feed_next(self.watering_hole, rest_players)
+        rest_players = players_feeding[1:]
+        intent = first_player.feed_next(self.watering_hole, rest_players, index=self.players.index(first_player))
 
         if not intent:
             debug("Removed player " + str(self.players.index(first_player)))

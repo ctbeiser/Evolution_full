@@ -143,3 +143,12 @@ class FeedingIntentTestCase(TestCase):
 
     def test_serialize_feed_none(self):
         self.assertEqual(FeedNone().serialize(), False)
+
+    def test_unrotate(self):
+        feeding = FeedCarnivore(0, 10, 2)
+        feeding.unrotate(4, 11)
+        self.assertEqual(feeding.defending_player_index, 3)
+
+        feeding = FeedCarnivore(2, 3, 1)
+        feeding.unrotate(4, 8)
+        self.assertEqual(feeding.defending_player_index, 7)

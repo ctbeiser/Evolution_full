@@ -308,10 +308,11 @@ class InternalPlayer(Player):
         except ValueError:
             return None
 
-    def feed_next(self, watering_hole, players):
+    def feed_next(self, watering_hole, players, index):
         """
         :param watering_hole: an Integer representing the food tokens in the Watering Hole
-        :param players: other Players in the game
+        :param players: other Players in the game, starting with the next one.
+        :param index: where this player is located in the list. (TODO: Remove this necessity)
         :return: a FeedingIntention, or None in the case of an invalid feeding
         """
         feeding = self.automatically_choose_species_to_feed(players)
@@ -322,6 +323,7 @@ class InternalPlayer(Player):
             try:
                 result = self.player_agent.feed_species(self.produce_state(watering_hole, players))
                 feeding = FeedingIntent.deserialize(result)
+                feeding.unrotate(index+1, len(players))
                 if feeding.is_valid(self, players, watering_hole):
                     return feeding
                 else:
@@ -477,11 +479,7 @@ class ExternalPlayer(Player):
                 def defender_player_key(species_player):
                     """ Sorts defender_player list based on largest species and then player order"""
                     species, player = species_player
-                    # The following has been removed for lack of support in the protocol.
-                    #player_id = player.player_id
-                    #if player_id > self.player_id:
-                        #player_id -= 1000
-                    return self.species_ordering_key(species), #player_id
+                    return self.species_ordering_key(species)
 
                 defender, player = sorted(largest_attackable, key=defender_player_key)[0]
                 return FeedCarnivore(self.species.index(candidate),players.index(player),player.species.index(defender))

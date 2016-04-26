@@ -101,7 +101,7 @@ class DealerTestCase(TestCase):
         # self.assertEqual(self.species_small_veg.food, 1)
         self.assertEqual(self.ndealer.watering_hole, 9)
 
-        self.dealer1.feed_one(self.ndealer.players)
+        #self.dealer1.feed_one(self.ndealer.players)
         # TODO: Fix these so they work despite the new arch— see feed one below for an example
         #self.assertEqual(self.species_small_veg.food, 1)
         #self.assertEqual(self.species_big_car.food, 2)
