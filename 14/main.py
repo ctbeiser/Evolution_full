@@ -1,7 +1,7 @@
 import sys
 
 from evolution.dealer import Dealer, MIN_PLAYERS
-from evolution.player import *
+from evolution.player import ExternalPlayer
 from evolution.server import Server
 from evolution.debug import debug
 from evolution.proxy_player import ProxyPlayer
@@ -19,15 +19,18 @@ def generate_score_string(scores):
         result += out_string
     return result
 
-def main(port=45678):
+def main(port):
     """ Carry out the game and print results to stdout
     :param port: Integer representing the port to play on
     """
-    server = Server("localhost", port)
-    remote_players_and_messages = server.add_players()
+    if port:
+        server = Server("localhost", port)
+        remote_players_and_messages = server.add_players()
+        proxies = [(ProxyPlayer(p[0]), p[1]) for p in remote_players_and_messages]
+    else:
+        proxies = [(ExternalPlayer(i), "hi") for i in range(5)]
 
     dealer = Dealer()
-    proxies = [(ProxyPlayer(p[0]), p[1]) for p in remote_players_and_messages]
     dealer.play_game(proxies)
 
     scores = dealer.get_scores()
@@ -39,5 +42,5 @@ if __name__ == '__main__':
     try:
         port = int(sys.argv[1])
     except IndexError:
-        port = 45678
+        port = None
     main(port)
