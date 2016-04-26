@@ -27,20 +27,6 @@ class Player:
         self.bag = bag
         self.cards = cards or []
 
-    def make_tree(self, tree, parent):
-        """ Modify the ttk tree provided to add a representation of this data structure
-        :param tree: a ttk Treeview widget object
-        :param parent: the ttk reference to a row in the ttk Treeview under which this content should be added.
-        """
-        p = tree.insert(parent, 'end', text=("Player " + str(self.player_id)))
-        tree.insert(p, 'end', text=("Bag:", str(self.bag)))
-        for species in self.species:
-            species.make_tree(tree, p)
-
-        h = tree.insert(p, 'end', text="Hand: " + ((str(len(self.cards)) + " cards") if self.cards else "empty"))
-        for card in self.cards:
-            card.make_tree(tree, h)
-
     def serialize(self):
         """ Returns a serialized version of the Player
         :return: serialized version of the Player

@@ -13,12 +13,6 @@ class TraitSerialization:
     This class is a mixin for Trait Enum, which allows it to serialize, deserialize, and appear in the GUI. This is
     necessary because Enums with a fixed set of members can't be extended.
     """
-    def make_tree(self, tree, parent):
-        """ Modify the ttk tree provided to add a representation of this data structure
-        :param tree: a ttk Treeview widget object
-        :param parent: the ttk reference to a row in the ttk Treeview under which this content should be added.
-        """
-        tree.insert(parent, 'end', text=("Trait: " + self.serialize()))
 
     def serialize(self):
         """ Returns a serialized representation of this data

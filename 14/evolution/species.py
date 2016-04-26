@@ -63,20 +63,6 @@ class Species:
                    len(self.traits) <= MAX_TRAITS]):
             raise ValueError()
 
-    def make_tree(self, tree, parent):
-        """ Modify the ttk tree provided to add a representation of this data structure
-        :param tree: a ttk Treeview widget object
-        :param parent: the ttk reference to a row in the ttk Treeview under which this content should be added.
-        """
-        s = tree.insert(parent, 'end', text=("Species (hungry)" if self.is_hungry() else "Species (full)"))
-        tree.insert(s, "end", text="Food: " + str(self.food))
-        tree.insert(s, "end", text="Body: " + str(self.body))
-        tree.insert(s, "end", text="Population: " + str(self.population))
-        if self.fat_food:
-            tree.insert(s, "end", text="Fat Food: " + str(self.fat_food))
-        for t in self.traits:
-            t.make_tree(tree, s)
-
     @classmethod
     def deserialize(cls, data):
         """ Creates a new Species object from a Species+

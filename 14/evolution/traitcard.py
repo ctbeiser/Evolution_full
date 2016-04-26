@@ -31,14 +31,6 @@ class TraitCard:
     def __eq__(self, other):
         return self.trait == other.trait and self.food_value == other.food_value
 
-
-    def make_tree(self, tree, parent):
-        """ Modify the ttk tree provided to add a representation of this data structure
-        :param tree: a ttk Treeview widget object
-        :param parent: the ttk reference to a row in the ttk Treeview under which this content should be added.
-        """
-        tree.insert(parent, 'end', text=(str(self.food_value) + ", " + self.trait.serialize()))
-
     def serialize(self):
         """ Returns a serialized version of the Card
         :return: serialized version of the Card

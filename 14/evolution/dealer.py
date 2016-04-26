@@ -25,19 +25,6 @@ class Dealer:
         self.deck = deck or []
         self.starting_player = 0
 
-    def make_tree(self, tree, parent):
-        """ Modify the ttk tree provided to add a representation of this data structure
-        :param tree: a ttk Treeview widget object
-        :param parent: the ttk reference to a row in the ttk Treeview under which this content should be added.
-        """
-        tree.insert(parent, 'end', text=("Watering Hole: " + str(self.watering_hole)))
-        players = tree.insert(parent, 'end', text="Players")
-        for p in self.players:
-            p.make_tree(tree, players)
-        deck = tree.insert(parent, "end", text="Deck: " + str(len(self.deck)) + " cards")
-        for c in self.deck:
-            c.make_tree(tree, deck)
-
     def serialize(self):
         """ Produce a serialized representation of a Dealer according to the specification
         :return: An array of [LOP+, Natural, LOC]
