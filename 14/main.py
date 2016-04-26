@@ -36,5 +36,8 @@ def main(port=45678):
     sys.stdout.write(generate_score_string(scores))
 
 if __name__ == '__main__':
-    port = int(sys.argv[1])
+    try:
+        port = int(sys.argv[1])
+    except IndexError:
+        port = 45678
     main(port)

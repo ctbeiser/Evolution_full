@@ -3,7 +3,7 @@ if [ $1 -ge 3 -a $1 -le 8 ]; then
 python3 main.py $2 &
 for (( i = 0; i < $1; i++ ));
 do
-    python3 players.py $2 $i &
+    python3 players.py $i $2 &
 done;
 fi
 exit 0;

@@ -86,6 +86,7 @@ class JSONSocket:
         try:
             decoded = json.loads(self.buffer.decode(self.ENCODING))
             self.buffer = bytes()
+            debug(decoded, verbose=True)
             return decoded
         except (UnicodeDecodeError, json.JSONDecodeError):
             raise self.IncompleteBufferException()
@@ -107,14 +108,13 @@ class JSONSocket:
         try:
             result = self.decode()
         except TimedOutError:
+            debug("Decode timed out")
+            debug(self.buffer)
             raise ValueError("No response arrived")
         # Ensure there's exactly one thing returned
         anything = self.sock.recv(self.BYTE_SIZE)
         if (anything and anything != b'\n' and anything != b' ' and anything != b'\t'):
             debug("Extra non-whitespace data was sent")
-            raise ValueError("Invalid response from Player")
-        if not result:
-            debug("No result was supplied by the program")
             raise ValueError("Invalid response from Player")
         return result
 

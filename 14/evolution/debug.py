@@ -3,16 +3,19 @@ import traceback
 
 #Integer between 0 (None) and 2 (All). 1 will print only those with the circumstance flag
 DEBUG = False
+VERBOSE = False
 
-
-def debug(string, player_id=None):
+def debug(string, player_id=None, verbose=False):
     """ Prints an object to the command line if debugging is enabled.
     Use instead of print because this may be expanded in the future to use debugging facilities properly.
     :param str: String
-    :circumstance: Override to print debug statements
+    :player_id: Player's id, if debug is called from a player
     """
+    if verbose:
+        if not VERBOSE:
+            return
     if DEBUG:
-        if player_id == 0:
+        if not player_id:
             print(string)
 
 
